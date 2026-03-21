@@ -20,4 +20,9 @@ export interface SeoResult {
   relatedKeywords?: KeywordData[];
 }
 
-
+export interface AiInsight {
+  summary: string;
+  strategy: string[];
+  recommendation: string;
+  keywordIdeas: string[];
+}
