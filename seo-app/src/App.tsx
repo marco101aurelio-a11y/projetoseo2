@@ -43,31 +43,35 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-surface text-on-surface transition-colors duration-500 overflow-hidden font-sans selection:bg-black selection:text-white">
+    <div className="flex h-screen bg-black text-white transition-colors duration-500 overflow-hidden font-sans selection:bg-white selection:text-black relative">
+      {/* Galactic Background Blobs */}
+      <div className="galactic-glow-blue top-[-10%] right-[-10%] opacity-30" />
+      <div className="galactic-glow-orange bottom-[20%] left-[-10%] opacity-20" />
+      <div className="galactic-glow-teal top-[40%] right-[20%] opacity-10" />
+      
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-surface-container-low rounded-full blur-[120px] opacity-50 pointer-events-none" />
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Header />
 
-        <main className="flex-1 overflow-y-auto px-8 py-16 md:px-16 lg:px-24 pb-32 scrollbar-hide relative z-10">
+        <main className="flex-1 overflow-y-auto px-8 py-8 md:px-16 lg:px-24 pb-20 scrollbar-hide relative">
           <div className="max-w-[1400px] mx-auto w-full">
             {activeTab === 'painel' ? (
               <>
-                <div className="flex flex-col gap-10 mb-24">
+                <div className="flex flex-col gap-8 mb-12">
                   <div className="max-w-4xl">
-                    <span className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-variant opacity-40 mb-6 block">Intelligence Platform</span>
-                    <h1 className="display-lg text-black mb-8 leading-[1.05]">
+                    <span className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-4 block">Intelligence Platform</span>
+                    <h1 className="display-lg text-white mb-6 leading-[1.05]">
                       Dados para escalar seu <br />
                       <span className="inline-block mt-2"><RotatingText /></span>
                     </h1>
-                    <p className="text-xl text-on-surface-variant font-medium max-w-2xl leading-relaxed">
+                    <p className="text-lg text-white/60 font-medium max-w-2xl leading-relaxed">
                       Descubra as palavras-chave mais rentáveis e domine o seu mercado através de uma interface de precisão etérea.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-surface-container-low rounded-[3rem] p-10 mb-20 shadow-[0_40px_80px_rgba(25,28,29,0.03)] focus-within:bg-surface-container-lowest transition-all duration-500">
+                <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-8 mb-10 shadow-[0_40px_80px_rgba(0,0,0,0.4)] border border-white/10 focus-within:bg-white/10 transition-all duration-500">
                   <SearchBar onSearch={handleSearch} isLoading={isSearching} />
                 </div>
 
@@ -96,12 +100,12 @@ export default function App() {
                       { title: 'Auditoria de Precisão', desc: 'Obtenha feedback imediato sobre o desempenho estratégico de qualquer termo.' },
                       { title: 'IA Transversal', desc: 'Integração profunda com a inteligência Capvi para decisões de alta lucratividade.' }
                     ].map((feature, i) => (
-                      <div key={i} className="tonal-lift p-12 hover:scale-[1.01] group cursor-default">
-                        <div className="w-14 h-14 bg-surface-container-highest rounded-full mb-8 flex items-center justify-center text-black font-black text-xl transition-all group-hover:bg-black group-hover:text-white">
+                      <div key={i} className="glass-card p-12 hover:scale-[1.01] group cursor-default">
+                        <div className="w-14 h-14 bg-white/10 rounded-full mb-8 flex items-center justify-center text-white font-black text-xl transition-all group-hover:bg-white group-hover:text-black">
                           0{i + 1}
                         </div>
-                        <h3 className="font-display font-extrabold text-2xl mb-4 text-black">{feature.title}</h3>
-                        <p className="text-on-surface-variant font-medium text-lg leading-relaxed">{feature.desc}</p>
+                        <h3 className="font-display font-extrabold text-2xl mb-4 text-white">{feature.title}</h3>
+                        <p className="text-white/60 font-medium text-lg leading-relaxed">{feature.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -109,12 +113,12 @@ export default function App() {
               </>
             ) : (
               <div className="flex flex-col items-start justify-center h-[60vh] text-left animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                <div className="bg-surface-container-highest w-20 h-20 rounded-[2rem] mb-12 flex items-center justify-center">
-                  <Bot className="w-10 h-10 text-black opacity-40" />
+                <div className="bg-white/10 w-20 h-20 rounded-[2rem] mb-12 flex items-center justify-center border border-white/10">
+                  <Bot className="w-10 h-10 text-white opacity-40" />
                 </div>
-                <h2 className="display-lg text-black mb-8 underline decoration-outline-variant decoration-4 underline-offset-8">Módulo em Desenvolvimento</h2>
-                <p className="text-xl text-on-surface-variant font-medium max-w-2xl leading-relaxed">
-                  A ferramenta de <strong className="text-black capitalize">{activeTab.replace('-', ' ')}</strong> está sendo arquitetada pela IA da Capvi. Em breve você terá relatórios profundos aqui.
+                <h2 className="display-lg text-white mb-8 underline decoration-white/10 decoration-4 underline-offset-8">Módulo em Desenvolvimento</h2>
+                <p className="text-xl text-white/60 font-medium max-w-2xl leading-relaxed">
+                  A ferramenta de <strong className="text-white capitalize">{activeTab.replace('-', ' ')}</strong> está sendo arquitetada pela IA da Capvi. Em breve você terá relatórios profundos aqui.
                 </p>
               </div>
             )}

@@ -60,8 +60,8 @@ export function ProjectsPage() {
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
-              <h2 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{selectedProject.name}</h2>
-              <p className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em]">Notebook de Inteligência Transversal</p>
+              <h2 className="text-4xl font-black tracking-tighter text-white uppercase">{selectedProject.name}</h2>
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Notebook de Inteligência Transversal</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -79,8 +79,8 @@ export function ProjectsPage() {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Meus Projetos</h2>
-          <p className="text-[#95a5a6] font-black mt-2 uppercase tracking-[0.2em] text-[10px]">Arquitetura de Ativos de Alto Desempenho.</p>
+          <h2 className="text-4xl font-black tracking-tighter text-white uppercase">Meus Projetos</h2>
+          <p className="text-white/40 font-black mt-2 uppercase tracking-[0.2em] text-[10px]">Arquitetura de Ativos de Alto Desempenho.</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
@@ -152,7 +152,7 @@ export function ProjectsPage() {
             <Globe className="w-10 h-10 text-orange-500" />
           </div>
           <h3 className="text-3xl font-black tracking-tighter text-white mb-4 uppercase">Nenhum Ativo Detectado</h3>
-          <p className="text-[#95a5a6] font-bold max-w-sm mx-auto mb-12 uppercase tracking-[0.2em] text-[10px] leading-relaxed">
+          <p className="text-white/40 font-bold max-w-sm mx-auto mb-12 uppercase tracking-[0.2em] text-[10px] leading-relaxed">
             Inicie a arquitetura do seu primeiro projeto para desbloquear a inteligência CAPVI OS.
           </p>
           <button
@@ -188,14 +188,14 @@ export function ProjectsPage() {
               
               <div className="relative z-10">
                 <h3 className="text-2xl font-black tracking-tighter text-white mb-4 leading-tight uppercase group-hover:text-orange-500 transition-colors">{project.name}</h3>
-                <p className="text-[#95a5a6] font-bold text-sm mb-10 line-clamp-2 leading-relaxed uppercase tracking-wide opacity-80">{project.description || 'Protocólo sem diretrizes'}</p>
+                <p className="text-white/40 font-bold text-sm mb-10 line-clamp-2 leading-relaxed uppercase tracking-wide opacity-80">{project.description || 'Protocólo sem diretrizes'}</p>
                 
                 <div className="grid grid-cols-2 gap-4 pt-8 border-t border-white/5">
-                  <div className="flex items-center gap-2 text-[9px] font-black text-[#95a5a6] uppercase tracking-[0.2em]">
+                  <div className="flex items-center gap-2 text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">
                     <Tag className="w-3.5 h-3.5 text-orange-500" />
                     <span>{project.keywords.length} Termos</span>
                   </div>
-                  <div className="flex items-center gap-2 text-[9px] font-black text-[#95a5a6] uppercase tracking-[0.2em]">
+                  <div className="flex items-center gap-2 text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">
                     <Calendar className="w-3.5 h-3.5 text-orange-500" />
                     <span>{new Date(project.createdAt).toLocaleDateString('pt-BR')}</span>
                   </div>

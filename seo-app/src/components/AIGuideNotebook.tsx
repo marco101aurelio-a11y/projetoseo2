@@ -8,16 +8,16 @@ export function AIGuideNotebook() {
         <div className="absolute inset-0 bg-black/5 blur-[80px] rounded-full" />
         <div className="relative bg-black p-10 rounded-full shadow-2xl shadow-black/20">
           <Book className="w-16 h-16 text-white" />
-          <div className="absolute -top-2 -right-2 bg-surface-container-highest p-3 rounded-full shadow-lg">
-            <Sparkles className="w-6 h-6 text-black" />
+          <div className="absolute -top-2 -right-2 bg-white/10 p-3 rounded-full shadow-lg border border-white/10">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
         </div>
       </div>
 
-      <h2 className="display-lg text-black mb-6 tracking-tighter">
+      <h2 className="display-lg text-white mb-6 tracking-tighter">
         CAPVI <br />Guide Notebook
       </h2>
-      <p className="text-xl text-on-surface-variant font-medium max-w-xl leading-relaxed mb-16">
+      <p className="text-xl text-white/60 font-medium max-w-xl leading-relaxed mb-16">
         Sua Central de Inteligência Transversal. <br />
         <span className="opacity-60">Sincronize dados de SEO, Finanças e Growth em um único documento regenerativo.</span>
       </p>
@@ -28,10 +28,10 @@ export function AIGuideNotebook() {
           { icon: PenTool, title: "SÍNTESE ATIVA", desc: "Transforme matrizes de dados brutos em planos de ação executáveis." },
           { icon: Sparkles, title: "BREVE", desc: "Treine a sua IA com seus próprios PDFs e documentos contextuais.", opacity: "opacity-40" }
         ].map((item, i) => (
-          <div key={i} className={cn("tonal-lift p-10 group", item.opacity)}>
-            <item.icon className="w-10 h-10 text-on-surface-variant mb-8 mx-auto group-hover:scale-110 transition-transform group-hover:text-black" />
-            <h4 className="font-black text-black mb-4 text-xs uppercase tracking-[0.3em]">{item.title}</h4>
-            <p className="text-xs text-on-surface-variant font-bold uppercase tracking-widest leading-relaxed opacity-60">{item.desc}</p>
+          <div key={i} className={cn("glass-card p-10 group", item.opacity)}>
+            <item.icon className="w-10 h-10 text-white/40 mb-8 mx-auto group-hover:scale-110 transition-transform group-hover:text-white" />
+            <h4 className="font-black text-white mb-4 text-xs uppercase tracking-[0.3em]">{item.title}</h4>
+            <p className="text-xs text-white/40 font-bold uppercase tracking-widest leading-relaxed">{item.desc}</p>
           </div>
         ))}
       </div>

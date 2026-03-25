@@ -17,18 +17,18 @@ const SimpleBarChart: React.FC<ChartProps> = ({ label, value, target, prefix = '
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-end">
-         <span className="text-on-surface-variant text-[10px] font-black uppercase tracking-[0.2em] opacity-60">{label}</span>
-         <span className="text-black font-display font-black text-3xl leading-none">
+         <span className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">{label}</span>
+         <span className="text-white font-display font-black text-3xl leading-none">
            {prefix}{value.toLocaleString('pt-BR')}{suffix}
          </span>
       </div>
-      <div className="h-4 w-full bg-surface-container-high rounded-full overflow-hidden">
+      <div className="h-4 w-full bg-white/10 rounded-full overflow-hidden">
         <div 
           className={cn("h-full rounded-full transition-all duration-1000 ease-out", color)}
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <div className="flex justify-between text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40">
+      <div className="flex justify-between text-[10px] text-white/20 font-black uppercase tracking-widest">
         <span>0</span>
         <span>META: {prefix}{target.toLocaleString('pt-BR')}{suffix}</span>
       </div>
@@ -47,19 +47,19 @@ const UnitEconomicsBar: React.FC<{ data: DreData }> = ({ data }) => {
   ];
 
   return (
-    <div className="bg-surface-container-low p-10 rounded-[2rem] group transition-all duration-500 hover:scale-[1.01]">
+    <div className="bg-white/5 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/10 group transition-all duration-500 hover:scale-[1.01] hover:bg-white/10">
       <div className="flex items-center justify-between mb-10">
-        <h4 className="text-[10px] font-black text-black uppercase tracking-[0.3em] flex items-center gap-3">
+        <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
           <Wallet className="w-5 h-5 opacity-40" />
           Unit Economics (R$ 100 VENDIDOS)
         </h4>
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-black rounded-full animate-pulse" />
-          <span className="text-[10px] text-black font-black uppercase tracking-widest">JAX CALIBRADO</span>
+          <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+          <span className="text-[10px] text-white font-black uppercase tracking-widest">JAX CALIBRADO</span>
         </div>
       </div>
       
-      <div className="h-10 w-full flex rounded-full overflow-hidden mb-12 shadow-inner bg-surface-container-highest">
+      <div className="h-10 w-full flex rounded-full overflow-hidden mb-12 shadow-inner bg-white/10">
         {parts.map((p, i) => {
           const pct = (p.val / total) * 100;
           if (pct <= 0) return null;
@@ -82,8 +82,8 @@ const UnitEconomicsBar: React.FC<{ data: DreData }> = ({ data }) => {
           <div key={i} className="flex items-center gap-4">
             <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: p.color }} />
             <div className="flex flex-col">
-              <span className="text-[10px] text-on-surface-variant font-black uppercase tracking-widest opacity-40">{p.label}</span>
-              <span className="text-sm text-black font-black italic">R$ {((p.val / total) * 100).toFixed(2)}</span>
+              <span className="text-[10px] text-white/40 font-black uppercase tracking-widest">{p.label}</span>
+              <span className="text-sm text-white font-black italic">R$ {((p.val / total) * 100).toFixed(2)}</span>
             </div>
           </div>
         ))}
@@ -126,28 +126,28 @@ const WaterfallChart: React.FC<{ data: DreData }> = ({ data }) => {
   });
 
   return (
-    <div className="bg-surface-container-low p-10 rounded-[2rem] h-96 flex flex-col group transition-all duration-500 hover:scale-[1.01]">
+    <div className="bg-white/5 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/10 h-96 flex flex-col group transition-all duration-500 hover:scale-[1.01] hover:bg-white/10">
       <div className="flex items-center justify-between mb-10">
-        <h4 className="text-[10px] font-black text-black uppercase tracking-[0.3em] flex items-center gap-3">
+        <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
           <TrendingUp className="w-5 h-5 opacity-40" />
           WATERFALL DE LUCRATIVIDADE
         </h4>
-        <Shield size={16} className="text-on-surface-variant opacity-20" />
+        <Shield size={16} className="text-white/20" />
       </div>
       
       <div className="flex-1 flex items-end justify-between gap-6 px-4 pb-10">
         {bars.map((bar, i) => (
           <div key={i} className="flex-1 flex flex-col items-center h-full relative group/bar">
-            <div className="absolute -top-8 text-[10px] font-black text-black opacity-0 group-hover/bar:opacity-100 transition-all whitespace-nowrap">
+            <div className="absolute -top-8 text-[10px] font-black text-white opacity-0 group-hover/bar:opacity-100 transition-all whitespace-nowrap">
               {bar.value > 0 ? '+' : ''}{((bar.value / total) * 100).toFixed(0)}%
             </div>
 
             <div 
               className={cn(
                 "w-full rounded-sm transition-all duration-700",
-                bar.type === 'start' ? 'bg-surface-container-highest' :
-                bar.type === 'end' ? (bar.value > 0 ? 'bg-black shadow-[0_20px_40px_rgba(0,0,0,0.15)]' : 'bg-error') :
-                'bg-on-surface-variant/20'
+                bar.type === 'start' ? 'bg-white/20' :
+                bar.type === 'end' ? (bar.value > 0 ? 'bg-white shadow-[0_20px_40px_rgba(255,255,255,0.15)]' : 'bg-error') :
+                'bg-white/10'
               )}
               style={{ 
                 height: `${bar.height}%`,
@@ -156,7 +156,7 @@ const WaterfallChart: React.FC<{ data: DreData }> = ({ data }) => {
             />
 
             <div className="absolute -bottom-10 w-full text-center">
-               <span className="text-[9px] text-on-surface-variant font-black uppercase tracking-widest opacity-40 truncate max-w-full block group-hover/bar:opacity-100 transition-opacity">
+               <span className="text-[9px] text-white/40 font-black uppercase tracking-widest truncate max-w-full block group-hover/bar:bg-white group-hover/bar:text-black transition-all">
                  {bar.label}
                </span>
             </div>
@@ -176,21 +176,21 @@ const FinancialVisuals: React.FC<{ data: DreData, ebitda_pct: number, roas: numb
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div className="p-12 bg-surface-container-low rounded-[2rem] hover:bg-surface-container-high transition-colors duration-500">
+        <div className="p-12 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 hover:bg-white/10 transition-colors duration-500">
           <SimpleBarChart 
             label="MARGEM EBITDA OPERACIONAL" 
             value={ebitda_pct} 
             target={25} 
             suffix="%" 
-            color="bg-black" 
+            color="bg-white" 
           />
         </div>
-        <div className="p-12 bg-surface-container-low rounded-[2rem] hover:bg-surface-container-high transition-colors duration-500">
+        <div className="p-12 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 hover:bg-white/10 transition-colors duration-500">
           <SimpleBarChart 
             label="ROAS ESTRATÉGICO JAX" 
             value={roas} 
             target={8} 
-            color="bg-black" 
+            color="bg-white" 
           />
         </div>
       </div>

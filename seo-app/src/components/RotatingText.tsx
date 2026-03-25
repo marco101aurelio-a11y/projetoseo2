@@ -23,7 +23,7 @@ export function RotatingText() {
   return (
     <span
       className={`
-        text-black font-display font-black
+        text-white font-display font-black
         transition-all duration-700 
         inline-block min-w-[280px] text-left
         ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}

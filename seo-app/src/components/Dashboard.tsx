@@ -68,16 +68,16 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
 
   return (
     <div className="mt-20 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b-0">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/5">
         <div className="space-y-4">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant opacity-60">Resultados para</span>
-          <h2 className="display-lg text-black">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-white opacity-40">Resultados para</span>
+          <h2 className="display-lg text-white">
             "{seoData.keywordData.keyword}"
           </h2>
         </div>
         <div className="flex gap-3">
           {seoData.keywordData.country && (
-            <span className="px-4 py-2 bg-surface-container-highest text-on-surface text-[10px] font-black rounded-sm uppercase tracking-widest">
+            <span className="px-4 py-2 bg-white/10 text-white text-[10px] font-black rounded-sm uppercase tracking-widest border border-white/10">
               {seoData.keywordData.country}
             </span>
           )}
@@ -94,13 +94,13 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
       <div className="mt-24 space-y-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-              <Bot className="w-5 h-5 text-on-primary" />
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+              <Bot className="w-5 h-5 text-black" />
             </div>
-            <h3 className="font-display font-bold text-xl tracking-tight">IA Estratégica</h3>
+            <h3 className="font-display font-bold text-xl tracking-tight text-white">IA Estratégica</h3>
           </div>
 
-          <div className="flex flex-wrap gap-2 bg-surface-container p-1.5 rounded-full">
+          <div className="flex flex-wrap gap-2 bg-white/5 p-1.5 rounded-full border border-white/10">
             {[
               { id: 'seo', label: 'SEO', icon: Target },
               { id: 'creatives', label: 'Criativos', icon: PenTool },
@@ -115,8 +115,8 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
                 className={cn(
                   "flex items-center gap-2 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
                   activeProfile === tab.id
-                    ? "bg-black text-on-primary shadow-lg"
-                    : "text-on-surface-variant hover:text-black hover:bg-surface-container-high"
+                    ? "bg-white text-black shadow-lg"
+                    : "text-white/40 hover:text-white hover:bg-white/5"
                 )}
               >
                 <tab.icon size={12} />
@@ -127,15 +127,15 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
         </div>
 
         {isGenerating ? (
-          <div className="bg-surface-container-low rounded-[2rem] p-32 flex flex-col items-center justify-center">
-            <Loader2 className="w-12 h-12 text-black animate-spin mb-6" />
-            <p className="text-on-surface-variant font-bold uppercase tracking-widest text-xs">Capvi IA está raciocinando...</p>
+          <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-32 flex flex-col items-center justify-center border border-white/10">
+            <Loader2 className="w-12 h-12 text-white animate-spin mb-6" />
+            <p className="text-white/40 font-bold uppercase tracking-widest text-xs">Capvi IA está raciocinando...</p>
           </div>
         ) : (
           <div className="space-y-12">
             {activeProfile === 'finance' && financeData && (
               <div className="animate-in fade-in slide-in-from-top-8 duration-700">
-                <div className="bg-surface-container-lowest rounded-[2rem] p-8 md:p-12 shadow-[0_20px_40px_rgba(25,28,29,0.03)]">
+                <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-8 md:p-12 shadow-2xl border border-white/10">
                   <DRETable data={financeData.detailed_dre} />
                 </div>
                 <div className="mt-12">
@@ -146,18 +146,18 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
 
             {localInsights && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-surface-container-lowest rounded-[2rem] p-10 md:p-16 shadow-[0_20px_40px_rgba(25,28,29,0.03)] border-none">
-                  <h4 className="flex items-center gap-3 font-display font-extrabold text-2xl mb-12">
-                    <Lightbulb className="w-6 h-6 text-black" />
+                <div className="lg:col-span-2 bg-white/5 backdrop-blur-2xl rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/10">
+                  <h4 className="flex items-center gap-3 font-display font-extrabold text-2xl mb-12 text-white">
+                    <Lightbulb className="w-6 h-6 text-white" />
                     Protocolo de Ação
                   </h4>
                   <ul className="space-y-10">
                     {(localInsights.strategy || []).map((step, idx) => (
                       <li key={idx} className="flex gap-8 items-start group">
-                        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-surface-container-highest text-black flex items-center justify-center font-black text-xs transition-colors group-hover:bg-black group-hover:text-white">
+                        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center font-black text-xs transition-colors group-hover:bg-white group-hover:text-black">
                           0{idx + 1}
                         </span>
-                        <p className="text-on-surface font-medium text-lg leading-relaxed pt-1">
+                        <p className="text-white/80 font-medium text-lg leading-relaxed pt-1">
                           {step}
                         </p>
                       </li>
@@ -166,18 +166,18 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
                 </div>
 
                 <div className="space-y-8">
-                  <div className="bg-surface-container-low rounded-[2rem] p-10">
-                    <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-on-surface-variant mb-6 flex items-center gap-2">
+                  <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-10 border border-white/10">
+                    <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-white/40 mb-6 flex items-center gap-2">
                       <Shield size={14} /> Resumo Executivo
                     </h4>
-                    <p className="text-on-surface font-medium leading-relaxed">
+                    <p className="text-white/80 font-medium leading-relaxed">
                       {localInsights.summary}
                     </p>
                   </div>
 
-                  <div className="bg-black text-on-primary rounded-[2rem] p-10 shadow-2xl shadow-black/10">
-                    <h4 className="font-black opacity-40 mb-6 text-[10px] uppercase tracking-[0.2em]">Veredito Baseado em Dados</h4>
-                    <p className="font-display font-extrabold text-2xl leading-snug">
+                  <div className="bg-white/10 backdrop-blur-2xl rounded-[3rem] p-10 border border-white/10 shadow-2xl">
+                    <h4 className="font-black text-white/40 mb-6 text-[10px] uppercase tracking-[0.2em]">Veredito Baseado em Dados</h4>
+                    <p className="font-display font-extrabold text-2xl leading-snug text-white">
                       {localInsights.recommendation}
                     </p>
                   </div>
@@ -193,16 +193,16 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
 
 function MetricCard({ icon: Icon, label, value, subtitle }: { icon: any, label: string, value: string, subtitle: string }) {
   return (
-    <div className="tonal-lift p-10 flex flex-col justify-between hover:scale-[1.02] cursor-default border-none group">
+    <div className="glass-card p-10 flex flex-col justify-between hover:scale-[1.02] cursor-default group">
       <div className="flex justify-between items-start mb-8">
-        <div className="w-12 h-12 bg-surface-container-highest rounded-full flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-500">
+        <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-all duration-500">
           <Icon className="w-6 h-6" />
         </div>
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant opacity-40">{label}</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white opacity-40">{label}</span>
       </div>
       <div>
-        <h3 className="text-4xl font-display font-extrabold text-black mb-3 tracking-tight">{value}</h3>
-        <p className="text-xs text-on-surface-variant font-bold uppercase tracking-widest">{subtitle}</p>
+        <h3 className="text-4xl font-display font-extrabold text-white mb-3 tracking-tight">{value}</h3>
+        <p className="text-xs text-white/40 font-bold uppercase tracking-widest">{subtitle}</p>
       </div>
     </div>
   );

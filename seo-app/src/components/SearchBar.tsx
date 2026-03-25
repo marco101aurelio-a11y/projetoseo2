@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SearchBarProps {
@@ -21,14 +21,14 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className={cn(
-        "flex items-center px-8 py-2 transition-all duration-500 rounded-full h-24",
+        "flex items-center px-8 py-2 transition-all duration-500 rounded-full h-24 border border-white/10",
         isFocused 
-          ? "bg-surface-container-lowest outline outline-1 outline-on-surface/10 shadow-[0_40px_80px_rgba(25,28,29,0.08)]" 
-          : "bg-surface-container-highest"
+          ? "bg-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.6)]" 
+          : "bg-white/5"
       )}>
         <Search className={cn(
           "w-6 h-6 transition-colors duration-500 mr-4",
-          isFocused ? "text-black" : "text-on-surface-variant/40"
+          isFocused ? "text-white" : "text-white/40"
         )} />
 
         <input
@@ -38,7 +38,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="Keyword, domain or strategy..."
-          className="flex-1 py-4 px-2 bg-transparent text-black placeholder:text-on-surface-variant/30 focus:outline-none text-xl font-medium min-w-0"
+          className="flex-1 py-4 px-2 bg-transparent text-white placeholder:text-white/40 focus:outline-none text-xl font-medium min-w-0"
           disabled={isLoading}
         />
 
@@ -49,7 +49,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
             className="premium-button h-14 px-10 gap-3 group/btn"
           >
             <span className="hidden sm:inline uppercase tracking-widest text-[10px] font-black">Analyze</span>
-            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
           </button>
         </div>
       </div>

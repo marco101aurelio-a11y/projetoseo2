@@ -29,13 +29,13 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
   return (
     <aside className={cn(
-      "h-screen bg-surface-container-low transition-all duration-500 flex flex-col items-center py-10 group relative z-50",
+      "h-screen bg-white/5 backdrop-blur-[24px] border-r border-white/5 transition-all duration-500 flex flex-col items-center py-10 group relative z-50",
       isPinned ? "w-80" : "w-24"
     )}>
       {/* Pin Toggle Button */}
       <button
         onClick={() => setIsPinned(!isPinned)}
-        className="absolute -right-3 top-32 bg-black text-white rounded-full p-1.5 shadow-xl z-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+        className="absolute -right-3 top-32 bg-white text-black rounded-full p-1.5 shadow-xl z-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
       >
         {isPinned ? <Pin size={10} /> : <PinOff size={10} />}
       </button>
@@ -48,14 +48,14 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         )}>
           {isPinned ? (
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-                <Search className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <Search className="w-5 h-5 text-black" />
               </div>
-              <span className="font-display font-black text-2xl tracking-tighter text-black">Capvi</span>
+              <span className="font-display font-black text-2xl tracking-tighter text-white">Capvi OS</span>
             </div>
           ) : (
-            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
-              <Search className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+              <Search className="w-6 h-6 text-black" />
             </div>
           )}
         </div>
@@ -73,15 +73,15 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
                 className={cn(
                   "relative w-full flex items-center gap-5 px-5 py-4 rounded-full transition-all group overflow-hidden",
                   isActive
-                    ? "bg-black text-white shadow-2xl shadow-black/10 font-bold"
-                    : "text-on-surface-variant hover:text-black hover:bg-surface-container-high font-medium"
+                    ? "bg-white/10 text-white shadow-2xl shadow-black/40 font-bold border border-white/10"
+                    : "text-white/60 hover:text-white hover:bg-white/5 font-medium"
                 )}
                 title={!isPinned ? link.label : undefined}
               >
                 <Icon className={cn("w-6 h-6 flex-shrink-0 transition-transform group-hover:scale-110", isActive && "text-white")} />
 
                 <span className={cn(
-                  "whitespace-nowrap transition-all duration-500 text-left text-sm uppercase tracking-widest font-black",
+                  "whitespace-nowrap transition-all duration-500 text-left text-xs uppercase tracking-widest font-black",
                   isPinned ? "opacity-100" : "w-0 opacity-0"
                 )}>
                   {link.label}
