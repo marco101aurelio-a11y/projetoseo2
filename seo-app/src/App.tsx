@@ -8,7 +8,7 @@ import { RotatingText } from './components/RotatingText';
 import { fetchSeoData } from './services/dataForSeo';
 import { generateSeoInsights } from './services/gemini';
 import type { SeoResult, AiInsight } from './types';
-
+import { Bot } from 'lucide-react';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -25,15 +25,10 @@ export default function App() {
     setError(null);
 
     try {
-      // Fetch data from DataForSEO
       const data = await fetchSeoData(query);
       setSeoData(data);
-      
-      // Generate AI Insights with Gemini
       const insights = await generateSeoInsights(data);
       setAiInsights(insights);
-
-      // Add intentional delay to let the user enjoy the capybara animation!
       await new Promise(resolve => setTimeout(resolve, 6500));
     } catch (err) {
       console.error(err);
@@ -43,87 +38,83 @@ export default function App() {
     }
   };
 
-  // Se o usuário não estiver autenticado, a barreira do React mostra APENAS a tela de login
   if (!isAuthenticated) {
     return <Auth onLogin={() => setIsAuthenticated(true)} />;
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 overflow-hidden font-sans">
+    <div className="flex h-screen bg-surface text-on-surface transition-colors duration-500 overflow-hidden font-sans selection:bg-black selection:text-white">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-slate-400/20 to-slate-600/20 ambient-bg pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-slate-300/10 to-slate-500/10 ambient-bg pointer-events-none" />
+        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-surface-container-low rounded-full blur-[120px] opacity-50 pointer-events-none" />
         <Header />
-        
-        <main className="flex-1 overflow-y-auto px-4 py-8 md:px-8 lg:px-12 pb-24 scrollbar-hide">
-          <div className="max-w-[1200px] mx-auto w-full">
+
+        <main className="flex-1 overflow-y-auto px-8 py-16 md:px-16 lg:px-24 pb-32 scrollbar-hide relative z-10">
+          <div className="max-w-[1400px] mx-auto w-full">
             {activeTab === 'painel' ? (
               <>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-                  <div className="max-w-2xl">
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-[1.1]">
-                      Inteligência de dados para escalar seu{" "}<RotatingText />
+                <div className="flex flex-col gap-10 mb-24">
+                  <div className="max-w-4xl">
+                    <span className="text-xs font-black uppercase tracking-[0.3em] text-on-surface-variant opacity-40 mb-6 block">Intelligence Platform</span>
+                    <h1 className="display-lg text-black mb-8 leading-[1.05]">
+                      Dados para escalar seu <br />
+                      <span className="inline-block mt-2"><RotatingText /></span>
                     </h1>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
-                      Descubra as palavras-chave mais rentáveis, analise a concorrência e domine o seu mercado com dados precisos.
+                    <p className="text-xl text-on-surface-variant font-medium max-w-2xl leading-relaxed">
+                      Descubra as palavras-chave mais rentáveis e domine o seu mercado através de uma interface de precisão etérea.
                     </p>
                   </div>
                 </div>
 
-                <div className="glass-panel p-6 sm:p-8 mb-12">
+                <div className="bg-surface-container-low rounded-[3rem] p-10 mb-20 shadow-[0_40px_80px_rgba(25,28,29,0.03)] focus-within:bg-surface-container-lowest transition-all duration-500">
                   <SearchBar onSearch={handleSearch} isLoading={isSearching} />
                 </div>
 
-                {/* Loading State */}
                 {isSearching && (
-                  <div className="mt-16 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 space-y-8 overflow-hidden w-full max-w-lg mx-auto relative h-40">
-                    <div className="absolute top-0 animate-walk flex justify-center w-[120%] max-w-none left-[-10%] mix-blend-multiply dark:mix-blend-screen mix-blend-mode-layer">
-                      <img src="/capivaras-andando.png" alt="Capivaras andando" className="h-24 animate-waddle filter grayscale contrast-200 dark:invert dark:brightness-[300%] dark:contrast-[200%]" />
+                  <div className="mt-24 flex flex-col items-center justify-center space-y-12 overflow-hidden w-full max-w-lg mx-auto relative h-60">
+                    <div className="absolute top-0 animate-walk flex justify-center w-[120%] max-w-none left-[-10%] opacity-20">
+                      <img src="/capivaras-andando.png" alt="Capvi Loader" className="h-32 filter grayscale" />
                     </div>
-                    <p className="text-lg font-bold animate-pulse absolute bottom-0 px-4 z-20 pb-2">Capvi IA carregando</p>
+                    <p className="text-xs font-black uppercase tracking-[0.4em] opacity-40 animate-pulse absolute bottom-0 z-20 pb-4">Arquitetando Inteligência</p>
                   </div>
                 )}
 
-                {/* Error State */}
                 {error && !isSearching && (
-                  <div className="mt-8 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 p-6 rounded-2xl border border-red-200 dark:border-red-800 text-center">
-                    <p className="font-medium">{error}</p>
+                  <div className="mt-12 bg-error/5 text-error p-10 rounded-[2rem] text-left border-none shadow-[0_20px_40px_rgba(186,26,26,0.05)]">
+                    <p className="font-bold text-lg">{error}</p>
                   </div>
                 )}
 
-                {/* Results Dashboard */}
                 {!isSearching && !error && seoData && (
                   <Dashboard seoData={seoData} aiInsights={aiInsights} />
                 )}
 
-                {/* Empty State / Initial Load area */}
                 {!isSearching && !error && !seoData && (
-                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-10">
                     {[
-                      { title: 'Auditoria Instantânea', desc: 'Obtenha feedback imediato sobre o desempenho de qualquer página ou termo.' },
-                      { title: 'Dados de Alta Precisão', desc: 'Integração em tempo real com a inteligência artificial exclusiva Capvi.' }
+                      { title: 'Auditoria de Precisão', desc: 'Obtenha feedback imediato sobre o desempenho estratégico de qualquer termo.' },
+                      { title: 'IA Transversal', desc: 'Integração profunda com a inteligência Capvi para decisões de alta lucratividade.' }
                     ].map((feature, i) => (
-                      <div key={i} className="glass-panel p-8 hover:-translate-y-1 transition-transform duration-300 group cursor-default">
-                        <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-2xl mb-4 flex items-center justify-center text-slate-900 dark:text-white font-black text-xl shadow-sm group-hover:scale-110 transition-transform">
-                          {i + 1}
+                      <div key={i} className="tonal-lift p-12 hover:scale-[1.01] group cursor-default">
+                        <div className="w-14 h-14 bg-surface-container-highest rounded-full mb-8 flex items-center justify-center text-black font-black text-xl transition-all group-hover:bg-black group-hover:text-white">
+                          0{i + 1}
                         </div>
-                        <h3 className="font-black text-xl mb-2 text-slate-900 dark:text-white">{feature.title}</h3>
-                        <p className="text-slate-600 dark:text-slate-400 font-medium">{feature.desc}</p>
+                        <h3 className="font-display font-extrabold text-2xl mb-4 text-black">{feature.title}</h3>
+                        <p className="text-on-surface-variant font-medium text-lg leading-relaxed">{feature.desc}</p>
                       </div>
                     ))}
                   </div>
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                <div className="glass-panel p-8 mb-8">
-                  <img src="/capivara.png" alt="Capvi Logo" className="h-16 w-auto mix-blend-multiply dark:mix-blend-screen filter grayscale contrast-200 dark:invert dark:brightness-[300%] dark:contrast-[200%]" />
+              <div className="flex flex-col items-start justify-center h-[60vh] text-left animate-in fade-in slide-in-from-bottom-12 duration-1000">
+                <div className="bg-surface-container-highest w-20 h-20 rounded-[2rem] mb-12 flex items-center justify-center">
+                  <Bot className="w-10 h-10 text-black opacity-40" />
                 </div>
-                <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Módulo em Desenvolvimento</h2>
-                <p className="text-lg text-slate-500 font-medium max-w-lg leading-relaxed">
-                  A ferramenta de <strong className="text-slate-900 dark:text-white capitalize">{activeTab.replace('-', ' ')}</strong> está sendo arquitetada pela IA da Capvi. Em breve você terá relatórios profundos aqui.
+                <h2 className="display-lg text-black mb-8 underline decoration-outline-variant decoration-4 underline-offset-8">Módulo em Desenvolvimento</h2>
+                <p className="text-xl text-on-surface-variant font-medium max-w-2xl leading-relaxed">
+                  A ferramenta de <strong className="text-black capitalize">{activeTab.replace('-', ' ')}</strong> está sendo arquitetada pela IA da Capvi. Em breve você terá relatórios profundos aqui.
                 </p>
               </div>
             )}

@@ -21,32 +21,34 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className={cn(
-        "flex items-center glass-panel px-4 sm:px-6 py-1 transition-all border border-transparent",
-        isFocused ? "ring-2 ring-slate-400/20 border-slate-300 dark:border-slate-600 shadow-md" : ""
+        "flex items-center px-8 py-2 transition-all duration-500 rounded-full h-24",
+        isFocused 
+          ? "bg-surface-container-lowest outline outline-1 outline-on-surface/10 shadow-[0_40px_80px_rgba(25,28,29,0.08)]" 
+          : "bg-surface-container-highest"
       )}>
         <Search className={cn(
-          "w-5 h-5 transition-colors",
-          isFocused ? "text-slate-900 dark:text-white" : "text-slate-400"
+          "w-6 h-6 transition-colors duration-500 mr-4",
+          isFocused ? "text-black" : "text-on-surface-variant/40"
         )} />
-        
+
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Digite a palavra-chave, domínio ou URL..."
-          className="flex-1 py-3 sm:py-4 px-2 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none text-base sm:text-lg min-w-0"
+          placeholder="Keyword, domain or strategy..."
+          className="flex-1 py-4 px-2 bg-transparent text-black placeholder:text-on-surface-variant/30 focus:outline-none text-xl font-medium min-w-0"
           disabled={isLoading}
         />
-        
-        <div className="pr-2 sm:pr-3 pl-1 sm:pl-2">
+
+        <div className="pl-4">
           <button
             type="submit"
             disabled={!query.trim() || isLoading}
-            className="premium-button py-2 px-3 sm:px-4 rounded-xl flex items-center gap-1 sm:gap-2 group/btn disabled:opacity-50 disabled:cursor-not-allowed"
+            className="premium-button h-14 px-10 gap-3 group/btn"
           >
-            <span className="hidden sm:inline">Buscar</span>
+            <span className="hidden sm:inline uppercase tracking-widest text-[10px] font-black">Analyze</span>
             <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
           </button>
         </div>

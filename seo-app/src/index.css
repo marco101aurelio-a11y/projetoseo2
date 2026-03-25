@@ -1,61 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap');
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: var(--color-slate-800);
-  --color-primary-hover: var(--color-slate-900);
-  --font-sans: "Inter", "system-ui", sans-serif;
+  --color-primary: #000000;
+  --color-primary-container: #3c3b3b;
+  --color-on-primary: #e5e2e1;
+  
+  --color-surface: #f8f9fa;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container: #edeeef;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-container-lowest: #ffffff;
+  
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #474747;
+  --color-outline-variant: rgba(198, 198, 198, 0.2);
+  
+  --color-error: #ba1a1a;
+  
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Manrope", sans-serif;
+  
+  --radius-lg: 2rem;
+  --radius-md: 1.5rem;
+  --radius-sm: 0.5rem;
 }
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-  }
-  
-  .dark {
-    --background: #0f172a;
-    --foreground: #f8fafc;
+    --background: #f8f9fa;
+    --foreground: #191c1d;
   }
 
   body {
     background-color: var(--background);
     color: var(--foreground);
-    @apply antialiased min-h-screen text-slate-900 selection:bg-slate-200;
+    @apply antialiased min-h-screen selection:bg-black selection:text-white;
+    font-family: var(--font-sans);
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply backdrop-blur-[20px] bg-white/15 border border-white/20 shadow-xl rounded-[20px] dark:bg-slate-900/40 dark:border-slate-800/60;
+    @apply bg-white/80 backdrop-blur-[20px] rounded-[2rem] shadow-[0_20px_40px_rgba(25,28,29,0.05)];
   }
 
-  .ambient-bg {
-    @apply blur-[40px] saturate-[1.5] scale-[1.2] opacity-80;
+  .tonal-lift {
+    @apply bg-surface-container-lowest shadow-[0_20px_40px_rgba(25,28,29,0.05)] transition-all duration-300;
   }
-  
+
+  .ghost-border {
+    @apply outline outline-1 outline-outline-variant;
+  }
+
   .premium-input {
-    @apply w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50 focus:border-slate-500 transition-all shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:placeholder-slate-500;
+    @apply w-full px-8 py-5 rounded-full bg-white/10 border border-white/20 text-black placeholder-black/30 focus:outline-none focus:bg-white/30 focus:ring-1 focus:ring-white/40 transition-all backdrop-blur-md text-lg shadow-inner;
   }
 
   .premium-button {
-    @apply inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow active:scale-95 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 bg-black text-on-primary font-bold px-8 py-4 rounded-full transition-all active:scale-95 disabled:opacity-50;
   }
-  .premium-button-outline {
-    @apply inline-flex items-center justify-center gap-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium px-5 py-2.5 rounded-xl transition-all active:scale-95 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
+
+  .display-lg {
+    @apply font-display text-[3.5rem] leading-[1.1] tracking-tight font-extrabold;
   }
 }
 
 @keyframes walk-horizontal {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes waddle {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  25% { transform: translateY(-6px) rotate(1deg); }
-  50% { transform: translateY(0) rotate(-1deg); }
-  75% { transform: translateY(-6px) rotate(1deg); }
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+
+  25% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+
+  50% {
+    transform: translateY(0) rotate(-1deg);
+  }
+
+  75% {
+    transform: translateY(-6px) rotate(1deg);
+  }
 }
 
 .animate-walk {

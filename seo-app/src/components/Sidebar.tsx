@@ -1,16 +1,13 @@
 import { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  ShoppingCart, 
-  Link as LinkIcon, 
-  Share2,
-  TrendingUp, 
-  Settings, 
-  HelpCircle,
-  Bot,
-  PanelLeftClose,
-  PanelLeftOpen
+import {
+  LayoutDashboard,
+  Search,
+  BarChart2,
+  Settings,
+  Database,
+  Users,
+  Pin,
+  PinOff
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -22,117 +19,70 @@ interface SidebarProps {
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const [isPinned, setIsPinned] = useState(true);
 
-  const mainLinks = [
-    { id: 'painel', label: 'Análise Palavras-Chave', icon: LayoutDashboard },
-    { id: 'projetos', label: 'Meus Projetos', icon: Settings },
-    { id: 'conteudo', label: 'Análise de Conteúdo', icon: FileText },
-    { id: 'amazon', label: 'Análise Amazon', icon: ShoppingCart },
-    { id: 'backlinks', label: 'Análise Backlinks', icon: LinkIcon },
-    { id: 'social', label: 'Mídias Sociais', icon: Share2 },
-    { id: 'tendencias', label: 'Tendências SEO', icon: TrendingUp },
-    { id: 'capvi-ia', label: 'Capvi IA', icon: Bot },
-  ];
-
-  const bottomLinks = [
-    { id: 'configuracoes', label: 'Configurações', icon: Settings },
-    { id: 'suporte', label: 'Suporte', icon: HelpCircle },
+  const navLinks = [
+    { id: 'painel', label: 'Painel Geral', icon: LayoutDashboard },
+    { id: 'projetos', label: 'Meus Projetos', icon: Database },
+    { id: 'insights', label: 'Insights Capvi', icon: BarChart2 },
+    { id: 'equipe', label: 'Minha Equipe', icon: Users },
+    { id: 'config', label: 'Configurações', icon: Settings },
   ];
 
   return (
-    <aside 
-      className={cn(
-        "bg-white dark:bg-[#0f172a] border-r border-slate-200 dark:border-slate-800 hidden lg:flex flex-col h-screen transition-all duration-300 z-50 flex-shrink-0 relative group",
-        isPinned ? "w-72" : "w-[5.5rem] hover:w-72" // 5.5rem = 88px, enough to clip text but show icon centered
-      )}
-    >
-      {/* Toggle Pinned Button */}
-      <button 
+    <aside className={cn(
+      "h-screen bg-surface-container-low transition-all duration-500 flex flex-col items-center py-10 group relative z-50",
+      isPinned ? "w-80" : "w-24"
+    )}>
+      {/* Pin Toggle Button */}
+      <button
         onClick={() => setIsPinned(!isPinned)}
-        className="absolute -right-3 top-9 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 rounded-full p-1.5 hover:text-indigo-600 dark:hover:text-indigo-400 z-50 transition-colors shadow-sm"
-        title={isPinned ? "Recolher Menu" : "Fixar Menu"}
+        className="absolute -right-3 top-32 bg-black text-white rounded-full p-1.5 shadow-xl z-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
       >
-        {isPinned ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+        {isPinned ? <Pin size={10} /> : <PinOff size={10} />}
       </button>
 
-      {/* Logo Area */}
-      <div className="h-24 flex items-center px-6 overflow-hidden flex-shrink-0">
-        <div className="flex items-center gap-4 w-60">
-          <img 
-            src="/capivara.png" 
-            alt="Capvi Logo" 
-            className="h-10 min-w-10 w-10 object-contain mix-blend-multiply filter transition-all grayscale contrast-200 dark:mix-blend-screen dark:invert dark:brightness-[300%] dark:contrast-[200%] flex-shrink-0" 
-          />
-          <span className={cn(
-            "text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white pb-1 whitespace-nowrap transition-all duration-300",
-            isPinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-          )}>
-            Capvi SEO
-          </span>
+      <div className="w-full px-6 flex flex-col items-start h-full">
+        {/* Logo Area */}
+        <div className={cn(
+          "mb-20 transition-all flex items-center justify-start w-full",
+          isPinned ? "px-2" : "justify-center"
+        )}>
+          {isPinned ? (
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                <Search className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-display font-black text-2xl tracking-tighter text-black">Capvi</span>
+            </div>
+          ) : (
+            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center">
+              <Search className="w-6 h-6 text-white" />
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-hide overflow-x-hidden">
-        <nav className="space-y-1.5 w-[16rem]">
-          {mainLinks.map((link) => {
+        {/* Navigation Section */}
+        <nav className="flex-1 w-full space-y-4">
+          {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = activeTab === link.id;
-            
+
             return (
               <button
                 key={link.id}
                 onClick={() => setActiveTab(link.id)}
                 className={cn(
-                  "w-[14.5rem] flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-200 relative group",
-                  isActive 
-                    ? "text-slate-900 dark:text-white font-bold" 
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium hover:bg-slate-50 dark:hover:bg-slate-800/20"
+                  "relative w-full flex items-center gap-5 px-5 py-4 rounded-full transition-all group overflow-hidden",
+                  isActive
+                    ? "bg-black text-white shadow-2xl shadow-black/10 font-bold"
+                    : "text-on-surface-variant hover:text-black hover:bg-surface-container-high font-medium"
                 )}
                 title={!isPinned ? link.label : undefined}
               >
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-slate-900 dark:bg-white rounded-r-full" />
-                )}
-                <Icon className={cn("w-6 h-6 flex-shrink-0 transition-transform group-hover:scale-110", isActive && "text-slate-900 dark:text-white")} />
-                
-                <span className={cn(
-                  "whitespace-nowrap transition-all duration-300 text-left",
-                  isPinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                )}>
-                  {link.label}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+                <Icon className={cn("w-6 h-6 flex-shrink-0 transition-transform group-hover:scale-110", isActive && "text-white")} />
 
-      {/* Bottom Links */}
-      <div className="p-4 mb-4 overflow-x-hidden flex-shrink-0">
-        <nav className="space-y-1.5 w-[16rem]">
-          {bottomLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = activeTab === link.id;
-            return (
-              <button
-                key={link.id}
-                onClick={() => setActiveTab(link.id)}
-                className={cn(
-                  "w-[14.5rem] flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 relative group",
-                  isActive 
-                    ? "text-slate-900 dark:text-white font-bold" 
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium hover:bg-slate-50 dark:hover:bg-slate-800/20"
-                )}
-                title={!isPinned ? link.label : undefined}
-              >
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-slate-900 dark:bg-white rounded-r-full" />
-                )}
-                <Icon className={cn("w-6 h-6 flex-shrink-0 transition-transform group-hover:scale-110", isActive && "text-slate-900 dark:text-white")} />
-                
                 <span className={cn(
-                  "whitespace-nowrap transition-all duration-300 text-left",
-                  isPinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                  "whitespace-nowrap transition-all duration-500 text-left text-sm uppercase tracking-widest font-black",
+                  isPinned ? "opacity-100" : "w-0 opacity-0"
                 )}>
                   {link.label}
                 </span>

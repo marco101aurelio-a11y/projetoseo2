@@ -35,7 +35,7 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
     setIsGenerating(true);
     setLocalInsights(null);
     setFinanceData(null);
-    
+
     try {
       if (profile === 'creatives') {
         const mock: AdStats = { adName: 'Video UGC Dores', clicks: 840, conversions: 22, spend: 450.00 };
@@ -48,11 +48,11 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
         setLocalInsights(await generateChurnPredictor(mock));
       } else if (profile === 'finance') {
         const investment = (seoData?.keywordData.search_volume || 1000) * (seoData?.keywordData.cpc || 1) * 0.1;
-        const result = await callJax("dre", { 
-          investment: investment > 0 ? investment : 5000, 
-          roas: 4.8, 
-          fixed_costs: 12000, 
-          cogs_pct: 0.32 
+        const result = await callJax("dre", {
+          investment: investment > 0 ? investment : 5000,
+          roas: 4.8,
+          fixed_costs: 12000,
+          cogs_pct: 0.32
         });
         setFinanceData(result);
         setLocalInsights(await generateFinanceInsights(result));
@@ -67,35 +67,40 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
   if (!seoData) return null;
 
   return (
-    <div className="mt-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          "{seoData.keywordData.keyword}"
-        </h2>
-        <div className="flex gap-2">
-           {seoData.keywordData.country && (
-             <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-lg uppercase tracking-wider">
-               📍 {seoData.keywordData.country}
-             </span>
-           )}
+    <div className="mt-20 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b-0">
+        <div className="space-y-4">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant opacity-60">Resultados para</span>
+          <h2 className="display-lg text-black">
+            "{seoData.keywordData.keyword}"
+          </h2>
+        </div>
+        <div className="flex gap-3">
+          {seoData.keywordData.country && (
+            <span className="px-4 py-2 bg-surface-container-highest text-on-surface text-[10px] font-black rounded-sm uppercase tracking-widest">
+              {seoData.keywordData.country}
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <MetricCard icon={BarChart3} label="Volume" value={(seoData.keywordData.search_volume || 0).toLocaleString('pt-BR')} subtitle="Buscas mensais" />
         <MetricCard icon={TrendingUp} label="CPC" value={`${seoData.keywordData.currency || 'R$'}${seoData.keywordData.cpc?.toFixed(2) || '0.00'}`} subtitle="Custo por clique" />
         <MetricCard icon={Target} label="Concorrência" value={seoData.keywordData.competition_index.toString()} subtitle={seoData.keywordData.competition} />
         <MetricCard icon={Zap} label="Lances" value={`${seoData.keywordData.high_top_of_page_bid?.toFixed(2) || '0.00'}`} subtitle="Topo de página" />
       </div>
 
-      <div className="mt-12 space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-3">
-            <Bot className="w-6 h-6 text-slate-900 dark:text-white" />
-            <h3 className="text-xl font-bold dark:text-white">IA Estratégica</h3>
+      <div className="mt-24 space-y-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+              <Bot className="w-5 h-5 text-on-primary" />
+            </div>
+            <h3 className="font-display font-bold text-xl tracking-tight">IA Estratégica</h3>
           </div>
-          
-          <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+
+          <div className="flex flex-wrap gap-2 bg-surface-container p-1.5 rounded-full">
             {[
               { id: 'seo', label: 'SEO', icon: Target },
               { id: 'creatives', label: 'Criativos', icon: PenTool },
@@ -108,69 +113,71 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
                 onClick={() => handleProfileSwitch(tab.id as AiProfile)}
                 disabled={isGenerating}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all",
-                  activeProfile === tab.id 
-                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" 
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  "flex items-center gap-2 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
+                  activeProfile === tab.id
+                    ? "bg-black text-on-primary shadow-lg"
+                    : "text-on-surface-variant hover:text-black hover:bg-surface-container-high"
                 )}
               >
-                <tab.icon size={14} />
+                <tab.icon size={12} />
                 {tab.label}
               </button>
             ))}
           </div>
         </div>
-        
+
         {isGenerating ? (
-          <div className="glass-panel p-20 flex flex-col items-center justify-center animate-pulse">
-            <Loader2 className="w-10 h-10 text-slate-400 animate-spin mb-4" />
-            <p className="text-slate-500 font-medium">Processando com Capvi IA...</p>
+          <div className="bg-surface-container-low rounded-[2rem] p-32 flex flex-col items-center justify-center">
+            <Loader2 className="w-12 h-12 text-black animate-spin mb-6" />
+            <p className="text-on-surface-variant font-bold uppercase tracking-widest text-xs">Capvi IA está raciocinando...</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {activeProfile === 'finance' && financeData && (
-              <div className="animate-in fade-in slide-in-from-top-4">
-                <DRETable data={financeData.detailed_dre} />
-                <div className="mt-8">
+              <div className="animate-in fade-in slide-in-from-top-8 duration-700">
+                <div className="bg-surface-container-lowest rounded-[2rem] p-8 md:p-12 shadow-[0_20px_40px_rgba(25,28,29,0.03)]">
+                  <DRETable data={financeData.detailed_dre} />
+                </div>
+                <div className="mt-12">
                   <FinancialVisuals data={financeData.detailed_dre} ebitda_pct={financeData.summary.ebitda_pct} roas={4.8} />
                 </div>
               </div>
             )}
 
             {localInsights && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 glass-panel p-8 md:p-10">
-                  <h4 className="flex items-center gap-2 font-bold text-lg mb-8 dark:text-white">
-                    <Lightbulb className="w-5 h-5 text-amber-500" />
-                    Plano de Ação Sugerido
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 bg-surface-container-lowest rounded-[2rem] p-10 md:p-16 shadow-[0_20px_40px_rgba(25,28,29,0.03)] border-none">
+                  <h4 className="flex items-center gap-3 font-display font-extrabold text-2xl mb-12">
+                    <Lightbulb className="w-6 h-6 text-black" />
+                    Protocolo de Ação
                   </h4>
-                  <ul className="space-y-6">
+                  <ul className="space-y-10">
                     {(localInsights.strategy || []).map((step, idx) => (
-                      <li key={idx} className="flex gap-4 items-start">
-                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold text-sm">
-                          {idx + 1}
+                      <li key={idx} className="flex gap-8 items-start group">
+                        <span className="flex-shrink-0 w-10 h-10 rounded-full bg-surface-container-highest text-black flex items-center justify-center font-black text-xs transition-colors group-hover:bg-black group-hover:text-white">
+                          0{idx + 1}
                         </span>
-                        <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                        <p className="text-on-surface font-medium text-lg leading-relaxed pt-1">
                           {step}
                         </p>
                       </li>
                     ))}
                   </ul>
                 </div>
-                
-                <div className="space-y-6">
-                  <div className="glass-panel p-8">
-                    <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-                      <Shield size={16} /> Resumo Executivo
+
+                <div className="space-y-8">
+                  <div className="bg-surface-container-low rounded-[2rem] p-10">
+                    <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-on-surface-variant mb-6 flex items-center gap-2">
+                      <Shield size={14} /> Resumo Executivo
                     </h4>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                    <p className="text-on-surface font-medium leading-relaxed">
                       {localInsights.summary}
                     </p>
                   </div>
-                  
-                  <div className="glass-panel p-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl">
-                    <h4 className="font-bold opacity-70 mb-4 text-xs uppercase tracking-wider">Recomendação Final</h4>
-                    <p className="font-bold text-xl leading-snug">
+
+                  <div className="bg-black text-on-primary rounded-[2rem] p-10 shadow-2xl shadow-black/10">
+                    <h4 className="font-black opacity-40 mb-6 text-[10px] uppercase tracking-[0.2em]">Veredito Baseado em Dados</h4>
+                    <p className="font-display font-extrabold text-2xl leading-snug">
                       {localInsights.recommendation}
                     </p>
                   </div>
@@ -186,16 +193,16 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
 
 function MetricCard({ icon: Icon, label, value, subtitle }: { icon: any, label: string, value: string, subtitle: string }) {
   return (
-    <div className="glass-panel p-6 flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300 group cursor-default">
-      <div className="flex justify-between items-start mb-4">
-        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-900 dark:text-white group-hover:bg-slate-950 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-slate-900 transition-colors">
-          <Icon className="w-5 h-5" />
+    <div className="tonal-lift p-10 flex flex-col justify-between hover:scale-[1.02] cursor-default border-none group">
+      <div className="flex justify-between items-start mb-8">
+        <div className="w-12 h-12 bg-surface-container-highest rounded-full flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-500">
+          <Icon className="w-6 h-6" />
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant opacity-40">{label}</span>
       </div>
       <div>
-        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-1">{value}</h3>
-        <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
+        <h3 className="text-4xl font-display font-extrabold text-black mb-3 tracking-tight">{value}</h3>
+        <p className="text-xs text-on-surface-variant font-bold uppercase tracking-widest">{subtitle}</p>
       </div>
     </div>
   );

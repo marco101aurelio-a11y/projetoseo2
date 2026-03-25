@@ -4,13 +4,13 @@ import { estimateSeoMetrics } from './gemini';
 // Replace these with actual DataForSEO endpoints and credentials
 const DATAFORSEO_API_URL = 'https://api.dataforseo.com/v3';
 
-export async function fetchSeoData(keyword: string): Promise<SeoResult> {
+export async function fetchSeoData(keyword: string, country: string = 'BR', engine: string = 'google'): Promise<SeoResult> {
   const login = import.meta.env.VITE_DATAFORSEO_LOGIN;
   const password = import.meta.env.VITE_DATAFORSEO_PASSWORD;
 
   if (!login || !password) {
     console.warn("DataForSEO credentials not found in .env. Returning AI Estimated data.");
-    return estimateSeoMetrics(keyword);
+    return estimateSeoMetrics(keyword, country, engine);
   }
 
   try {
@@ -33,7 +33,7 @@ export async function fetchSeoData(keyword: string): Promise<SeoResult> {
     if (!response.ok) {
       if (response.status === 402) {
         console.warn("DataForSEO balance exhausted. Falling back to AI estimation.");
-        return estimateSeoMetrics(keyword);
+        return estimateSeoMetrics(keyword, country, engine);
       }
       throw new Error(`DataForSEO API error: ${response.statusText}`);
     }
@@ -45,7 +45,7 @@ export async function fetchSeoData(keyword: string): Promise<SeoResult> {
     const resultItem = taskResult?.[0]?.items ? taskResult[0]?.items?.[0] : taskResult?.[0];
     
     if (!resultItem) {
-      return estimateSeoMetrics(keyword);
+      return estimateSeoMetrics(keyword, country, engine);
     }
 
     return {
@@ -63,6 +63,6 @@ export async function fetchSeoData(keyword: string): Promise<SeoResult> {
 
   } catch (error) {
     console.error("Error fetching SEO data, using AI estimation:", error);
-    return estimateSeoMetrics(keyword);
+    return estimateSeoMetrics(keyword, country, engine);
   }
 }

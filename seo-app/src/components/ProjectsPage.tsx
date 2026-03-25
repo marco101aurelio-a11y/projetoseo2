@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, Globe, Calendar, Tag } from 'lucide-react';
+import { Plus, Trash2, Edit2, Globe, Calendar, Tag, Book, ArrowLeft } from 'lucide-react';
 import { projectService } from '../services/projectService';
 import type { Project } from '../types';
+import { AIGuideNotebook } from './AIGuideNotebook';
 
 export function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState({ name: '', url: '', description: '' });
-
-  useEffect(() => {
-    loadProjects();
-  }, []);
 
   const loadProjects = () => {
     setProjects(projectService.getProjects());
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadProjects();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,84 +33,113 @@ export function ProjectsPage() {
     loadProjects();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (confirm('Tem certeza que deseja excluir este projeto?')) {
       projectService.deleteProject(id);
       loadProjects();
     }
   };
 
-  const handleEdit = (project: Project) => {
+  const handleEdit = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
     setEditingProject(project);
     setFormData({ name: project.name, url: project.url, description: project.description });
     setIsAdding(true);
   };
 
+  if (selectedProject) {
+    return (
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setSelectedProject(null)}
+              className="p-3 glass-panel hover:bg-orange-500/10 dark:hover:bg-white/10 transition-all rounded-2xl group"
+            >
+              <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            </button>
+            <div>
+              <h2 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{selectedProject.name}</h2>
+              <p className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em]">Notebook de Inteligência Transversal</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+             <span className="px-5 py-2 glass-panel bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-black rounded-full uppercase tracking-[0.2em] shadow-lg shadow-orange-900/10 ring-1 ring-orange-500/20">
+                IA DEDICADA: ATIVA
+             </span>
+          </div>
+        </div>
+        <AIGuideNotebook />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">Meus Projetos</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Gerencie seus sites e campanhas de SEO.</p>
+          <h2 className="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Meus Projetos</h2>
+          <p className="text-[#95a5a6] font-black mt-2 uppercase tracking-[0.2em] text-[10px]">Arquitetura de Ativos de Alto Desempenho.</p>
         </div>
         <button
           onClick={() => setIsAdding(true)}
-          className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-slate-200 dark:shadow-none"
+          className="premium-button shadow-xl shadow-orange-900/20"
         >
-          <Plus className="w-5 h-5" /> Novo Projeto
+          <Plus className="w-5 h-5" /> Inicializar Ativo
         </button>
       </div>
 
       {isAdding && (
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm animate-in zoom-in-95 duration-200">
-          <h3 className="text-xl font-bold mb-6">{editingProject ? 'Editar Projeto' : 'Criar Novo Projeto'}</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Nome do Projeto</label>
+        <div className="glass-card p-12 animate-in zoom-in-95 duration-500 mb-12 border-none ring-1 ring-white/10 shadow-orange-900/10">
+          <h3 className="text-3xl font-black tracking-tighter mb-10 uppercase">{editingProject ? 'Configurar Camada' : 'Arquitetar Novo Projeto'}</h3>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em] px-2">Identidade do Projeto</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Ex: Minha Loja Virtual"
-                  className="w-full bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-slate-900 dark:focus:ring-white transition-all outline-none font-medium"
+                  placeholder="Ex: Capvi Store"
+                  className="premium-input"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">URL do Site</label>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em] px-2">Domínio Operacional</label>
                 <input
                   type="url"
                   required
                   value={formData.url}
                   onChange={e => setFormData({ ...formData, url: e.target.value })}
-                  placeholder="https://exemplo.com"
-                  className="w-full bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-slate-900 dark:focus:ring-white transition-all outline-none font-medium"
+                  placeholder="https://capvi.ai"
+                  className="premium-input"
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Descrição / Notas</label>
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-[#95a5a6] uppercase tracking-[0.2em] px-2">Diretrizes & Contexto Estratégico</label>
               <textarea
                 value={formData.description}
                 onChange={e => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Breve descrição do projeto ou objetivos de SEO..."
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-slate-900 dark:focus:ring-white transition-all outline-none font-medium h-32 resize-none"
+                placeholder="Defina o nicho, público e objetivos transversais..."
+                className="premium-input h-40 resize-none pt-5"
               />
             </div>
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-6 mt-10 pt-8 border-t border-white/5">
               <button
                 type="button"
                 onClick={() => { setIsAdding(false); setEditingProject(null); }}
-                className="px-6 py-3 rounded-2xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all font-sans"
+                className="px-8 py-4 rounded-2xl font-black text-[#95a5a6] hover:text-white transition-all uppercase tracking-widest text-[10px]"
               >
-                Cancelar
+                Abortar
               </button>
               <button
                 type="submit"
-                className="px-8 py-3 rounded-2xl font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:shadow-lg transition-all font-sans"
+                className="premium-button px-12"
               >
-                {editingProject ? 'Salvar Alterações' : 'Criar Projeto'}
+                {editingProject ? 'Atualizar Protocolo' : 'Confirmar Arquitetura'}
               </button>
             </div>
           </form>
@@ -115,55 +147,64 @@ export function ProjectsPage() {
       )}
 
       {projects.length === 0 ? (
-        <div className="bg-slate-100/50 dark:bg-slate-800/20 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-16 text-center">
-          <div className="bg-white dark:bg-slate-800 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <Globe className="w-10 h-10 text-slate-400" />
+        <div className="glass-card p-24 text-center border-none ring-1 ring-white/10">
+          <div className="bg-orange-500/10 w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-lg shadow-orange-950/20">
+            <Globe className="w-10 h-10 text-orange-500" />
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Nenhum projeto encontrado</h3>
-          <p className="text-slate-500 font-medium max-w-sm mx-auto mb-8">
-            Comece criando seu primeiro projeto para gerenciar suas palavras-chave e insights.
+          <h3 className="text-3xl font-black tracking-tighter text-white mb-4 uppercase">Nenhum Ativo Detectado</h3>
+          <p className="text-[#95a5a6] font-bold max-w-sm mx-auto mb-12 uppercase tracking-[0.2em] text-[10px] leading-relaxed">
+            Inicie a arquitetura do seu primeiro projeto para desbloquear a inteligência CAPVI OS.
           </p>
           <button
             onClick={() => setIsAdding(true)}
-            className="text-slate-900 dark:text-white font-bold underline underline-offset-4 hover:opacity-70 transition-opacity"
+            className="premium-button"
           >
-            Adicionar meu primeiro projeto
+            Adicionar Primeiro Ativo
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {projects.map(project => (
-            <div key={project.id} className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-              <div className="flex justify-between items-start mb-6">
-                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl group-hover:scale-110 transition-transform">
-                  <Globe className="w-6 h-6 text-slate-900 dark:text-white" />
+            <div 
+              key={project.id} 
+              onClick={() => setSelectedProject(project)}
+              className="glass-card p-10 hover:-translate-y-3 hover:shadow-orange-900/20 transition-all duration-700 group cursor-pointer relative overflow-hidden border-none ring-1 ring-white/5"
+            >
+              <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/5 rounded-full blur-[60px] -mr-20 -mt-20 group-hover:bg-orange-500/10 transition-colors duration-700"></div>
+              
+              <div className="flex justify-between items-start mb-10 relative z-10">
+                <div className="bg-orange-600 p-4 rounded-2xl shadow-2xl shadow-orange-900/40 group-hover:scale-110 transition-transform duration-500">
+                  <Globe className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleEdit(project)} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                    <Edit2 className="w-5 h-5" />
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
+                  <button onClick={(e) => handleEdit(project, e)} className="p-3 glass-panel hover:bg-white dark:hover:bg-white/10 transition-all rounded-xl border-none ring-1 ring-white/10">
+                    <Edit2 className="w-4 h-4 text-white" />
                   </button>
-                  <button onClick={() => handleDelete(project.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                    <Trash2 className="w-5 h-5" />
+                  <button onClick={(e) => handleDelete(project.id, e)} className="p-3 glass-panel hover:bg-red-500/20 hover:text-red-500 transition-all rounded-xl border-none ring-1 ring-white/10">
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
               
-              <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2 leading-tight">{project.name}</h3>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mb-6 line-clamp-2">{project.description || 'Sem descrição'}</p>
-              
-              <div className="space-y-3 pt-6 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400 font-bold">
-                  <Globe className="w-4 h-4" />
-                  <span className="truncate">{project.url.replace('https://', '').replace('http://', '')}</span>
+              <div className="relative z-10">
+                <h3 className="text-2xl font-black tracking-tighter text-white mb-4 leading-tight uppercase group-hover:text-orange-500 transition-colors">{project.name}</h3>
+                <p className="text-[#95a5a6] font-bold text-sm mb-10 line-clamp-2 leading-relaxed uppercase tracking-wide opacity-80">{project.description || 'Protocólo sem diretrizes'}</p>
+                
+                <div className="grid grid-cols-2 gap-4 pt-8 border-t border-white/5">
+                  <div className="flex items-center gap-2 text-[9px] font-black text-[#95a5a6] uppercase tracking-[0.2em]">
+                    <Tag className="w-3.5 h-3.5 text-orange-500" />
+                    <span>{project.keywords.length} Termos</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[9px] font-black text-[#95a5a6] uppercase tracking-[0.2em]">
+                    <Calendar className="w-3.5 h-3.5 text-orange-500" />
+                    <span>{new Date(project.createdAt).toLocaleDateString('pt-BR')}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400 font-bold font-sans">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date(project.createdAt).toLocaleDateString('pt-BR')}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400 font-bold font-sans">
-                  <Tag className="w-4 h-4" />
-                  <span>{project.keywords.length} palavras-chave</span>
-                </div>
+
+                <button className="w-full mt-10 py-5 glass-panel bg-orange-500/5 text-orange-500 font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 group-hover:bg-orange-600 group-hover:text-white transition-all duration-500 rounded-2xl border-none ring-1 ring-orange-500/20 group-hover:ring-orange-600/50">
+                  <Book className="w-4 h-4" />
+                  Sincronizar Notebook
+                </button>
               </div>
             </div>
           ))}

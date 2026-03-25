@@ -1,36 +1,30 @@
 import { GoogleGenAI } from '@google/genai';
-import type { SeoResult, AiInsight, AdStats, CampaignData, AudienceBehavior } from '../types';
+import type { SeoResult, AiInsight, AdStats, CampaignData, AudienceBehavior, FinanceResult } from '../types';
 
 /**
- * 🧠 CAPVI IA V3.6 — O CÉREBRO REGENERATIVO & GROWTH
+ * 🧠 CAPVI IA V5.1 — O CÉREBRO REGENERATIVO & GROWTH
  * Fusion: Kotler (Processos) + V4 (AERM) + Growth Hacking (Escala) + JAX (Matemática).
  */
 const V4_GROWTH_CORE = `
 Sua Alma: Você é a Capvi IA, uma inteligência de Elite em Marketing e Finanças.
 Seu Método: Unir a profundidade de Kotler (Marketing Holístico) com a agressividade de Growth da V4 Company (AERM).
 Sua Voz: Didática, Inspiradora, Consciente e Resolutiva. Você gera "Aha! Moments".
-
-MANUAL DE LÓGICA JAX (Interprete estes dados para o usuário):
-1. IPM (Intelligence Per Minute): 
-   - > 10.000: Oceano Azul (Dominar agora!).
-   - 3.000 - 10.000: Zona de Crescimento (Escalável).
-   - < 3.000: Mercado Maduro (Exige diferenciação extrema).
-2. LTV/CAC (Saúde do Negócio):
-   - > 3.0: Operação Saudável. 
-   - > 5.0: Máquina de Impressão de Dinheiro.
-   - < 3.0: Atenção! O custo de aquisição está drenando o lucro.
-3. ICE Score (Growth): Impacto x Confiança x Facilidade. Projetos > 700 são prioridade máxima.
 `;
 
-async function callJax(endpoint: string, body: any): Promise<any | null> {
+export async function callJax(endpoint: string, body: any): Promise<any | null> {
   try {
-    const response = await fetch(`http://localhost:8000/analyze/${endpoint}`, {
+    const response = await fetch(`http://127.0.0.1:8000/analyze/${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
-    return response.ok ? await response.json() : null;
-  } catch { return null; }
+    
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (err) {
+    console.error(`Falha crítica de conexão com Motor JAX (${endpoint}):`, err);
+    return null;
+  }
 }
 
 function validateInsight(data: any, keyword: string, isResilient = false, errorDetail?: string): AiInsight {
@@ -99,38 +93,32 @@ export async function generateSeoInsights(seoData: SeoResult): Promise<AiInsight
   }
 }
 
-export async function generateFinancialInsights(data: any): Promise<AiInsight> {
+export async function generateFinanceInsights(dre: FinanceResult): Promise<AiInsight> {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  const jax = await callJax("finance", {
-    revenue: data.revenue || 100000,
-    costs: data.costs || 40000,
-    fixed_costs: data.fixed_costs || 20000,
-    cac: data.cac || 50,
-    ltv: data.ltv || 150
-  });
-
-  if (!apiKey) return simulateFinanceWithJax(data, jax, "API Key Missing");
+  if (!apiKey) return simulateFinanceWithJax(dre, "API Key Missing");
 
   try {
     const ai = new GoogleGenAI({ apiKey });
     const contextData = `
-      DRE ANALISADA:
-      - Faturamento: R$ ${data.revenue}
-      - Margem Líquida JAX: ${jax ? (jax.net_margin * 100).toFixed(1) : 'N/A'}%
-      - LTV/CAC Ratio: ${jax?.ltv_cac_ratio || 'N/A'}
-      - Breakeven: R$ ${jax?.breakeven || 'N/A'}
+      DRE ANALISADA (MODELO V4):
+      - Receita Bruta: R$ ${dre.detailed_dre.receita_bruta}
+      - EBITDA Final: R$ ${dre.detailed_dre.ebitda_final} (${dre.summary.ebitda_pct.toFixed(1)}%)
+      - Investimento em Ads: R$ ${dre.detailed_dre.investimento_ads}
+      - Status JAX: ${dre.summary.status}
     `;
     
     const prompt = `
       ${V4_GROWTH_CORE}
       ${contextData}
-      MISSÃO: Seja o "Projetor de Lucro". Explique se a empresa é escalável (Growth) ou se precisa de oxigênio financeiro (Cortes).
+      MISSÃO: Seja o "CFO de Growth". Analise o DRE acima. 
+      Se o EBITDA for < 10%, foque em reduzir custos variáveis (Frete/Marketplace) ou aumentar o ROAS.
+      Se o EBITDA for > 20%, injete mais verba.
       RETORNE APENAS JSON: summary, strategy, keywordIdeas, recommendation.
     `;
     const response = await ai.models.generateContent({ model: GEMINI_MODEL, contents: formatPrompt(prompt) });
     const aiData = JSON.parse(extractText(response).replace(/```json\n?|\n?```/g, '').trim());
     return validateInsight(aiData, "Finanças", false);
-  } catch (e: any) { return simulateFinanceWithJax(data, jax, e?.message); }
+  } catch (e: any) { return simulateFinanceWithJax(dre, e?.message); }
 }
 
 export async function generateCreativeInsights(stats: AdStats): Promise<AiInsight> {
@@ -187,78 +175,152 @@ export async function generateChurnPredictor(behavior: AudienceBehavior): Promis
   } catch (e: any) { return simulateRetentionWithJax(behavior, jax, e?.message); }
 }
 
-// SIMULADORES V3.6 (Melhorados com a Alma do Negócio para Fallback)
+// SIMULADORES V4 — O CÉREBRO LOCAL RESILIENTE (Kotler + JAX + V4)
 
-function simulateFinanceWithJax(data: any, jax: any | null, error?: string): AiInsight {
-  const margin = jax ? `${(jax.net_margin * 100).toFixed(1)}%` : "N/A";
+function simulateFinanceWithJax(_data: any, jax: any | null, error?: string): AiInsight {
+  const summary = jax?.summary;
+  const status = summary?.status || "Em Análise";
+  const ltvCac = summary?.ltv_cac_ratio || 0;
+  const margin = summary?.ebitda_pct !== undefined ? summary.ebitda_pct.toFixed(1) : "N/A";
+  
   return {
-    summary: `[MODO RESILIENTE] Sua Alma Financeira indica Margem de ${margin}. O lucro é a garantia da liberdade.`,
-    strategy: ["Poda de Ativos: Corte custos fixos inúteis.", "Fertilização: Reinvista o lucro em canais campeões.", "Ciclo de Valor: Escaneie o LTV/CAC."],
-    recommendation: "Atenção cirúrgica na DRE. O crescimento exige base sólida.",
-    keywordIdeas: ["gestão dre", "v4 finance"],
+    summary: `[AUDITORIA FINANCEIRA JAX] O motor detectou um status de "${status}". Com uma margem líquida projetada de ${margin}%, seu ecossistema está operando dentro dos benchmarks de sustentabilidade local.`,
+    strategy: [
+      `Análise de Unit Economics: Seu LTV/CAC atual é de ${ltvCac.toFixed(2)}. No framework de Growth, uma relação acima de 3.0 é o "Sinal Verde" para escala. Se estiver abaixo, foque em retenção antes de injetar mais verba para evitar a queima de caixa.`,
+      `Otimização de Break-even: Seu ponto de equilíbrio calculado está em R$ ${summary?.breakeven?.toLocaleString() || "pendente"}. Isso significa que qualquer venda acima deste valor contribui diretamente para o lucro líquido (Bottom Line), permitindo maior agressividade no marketing.`,
+      `Gestão de Alocação (V4): Recomendamos que 20% do orçamento seja reservado para experimentação de novos canais, enquanto os 80% restantes devem sustentar o CAC controlado nos canais que já validaram o ROI (canais de tração).`
+    ],
+    recommendation: ltvCac > 3 
+      ? "Sinal VERDE para Escala: Os números autorizam um aumento agressivo no orçamento de tráfego pago para capturar maior fatia de mercado." 
+      : "Alerta de Eficiência: Foque em diminuir o CAC ou aumentar o Ticket Médio antes de escalar o volume para não comprometer a margem líquida.",
+    keywordIdeas: ["gestão de margem", "v4 scale", "unit economics", "ponto de equilíbrio"],
     isResilient: true,
     errorDetail: error
   };
 }
 
-function simulateCreativeWithJax(stats: AdStats, _jax: any | null, error?: string): AiInsight {
+function simulateCreativeWithJax(stats: AdStats, jax: any | null, error?: string): AiInsight {
+  const score = jax?.score || 500;
   return {
-    summary: `[MODO RESILIENTE] Analisando o DNA do Criativo "${stats.adName}". Conecte-se com a dor do cliente.`,
-    strategy: ["Impacto Imediato: O hook deve ser regenerativo.", "Confiança: Prova social é o oxigênio da venda.", "Facilidade: O caminho para o checkout deve ser um convite, não um labirinto."],
-    recommendation: "Refinar a estética para transmitir o valor premium da marca.",
-    keywordIdeas: ["v4 criativos", "branding"],
+    summary: `[VALIDADOR DE CRIATIVO LOCAL] O criativo "${stats.adName}" foi analisado via ICE Score: ${score}. Este modelo avalia o potencial de Impacto, Confiança e Facilidade de implementação.`,
+    strategy: [
+      "Pilar da Atenção (V4): Os primeiros 3 segundos do seu anúncio são o funil de entrada. Recomendamos Teste A/B de 'Hook' focado em quebra de padrão visual ou uma pergunta direta sobre a dor do cliente para aumentar o CTR.",
+      "Conexão Emocional (Kotler): Marcas que vencem no longo prazo não vendem produtos, vendem transformações. Tente um ângulo mais aspiracional que mostre como a vida do cliente melhora após a solução.",
+      "Call to Action (CTA) Direta: Certifique-se de que a chamada para ação é única e imperativa. 'Saiba Mais' é genérico; use chamadas que criem urgência como 'Garanta o seu com benefício exclusivo hoje'."
+    ],
+    recommendation: score > 700 
+      ? "Executar Imediatamente: Este criativo tem alto potencial de escala e deve ser priorizado no seu orçamento de teste." 
+      : "Refinar MVP: O impacto emocional ainda está baixo para o padrão de excelência V4. Itere na narrativa antes de escalar.",
+    keywordIdeas: ["creative growth", "branding holístico", "teste a/b", "copywriting v4"],
     isResilient: true,
     errorDetail: error
   };
 }
 
 function simulateBudgetWithJax(data: CampaignData, _jax: any | null, error?: string): AiInsight {
+  const roas = data.roas;
+  const isGood = roas >= data.targetRoas;
+
   return {
-    summary: `[MODO RESILIENTE] ROAS de ${data.roas}x detectado. O motor está pronto para girar mais rápido.`,
-    strategy: ["Escala com Alma: Não perca a essência ao crescer o orçamento.", "Diversificação de Solo: Não dependa apenas de um canal.", "Analise de Safra: Acompanhe o retorno histórico."],
-    recommendation: "Sinal verde para escala orgânica e controlada.",
-    keywordIdeas: ["escala v4", "roi consciente"],
+    summary: `[ORQUESTRADOR DE VERBA] Seu ROAS de ${roas}x indica que sua máquina de vendas está ${isGood ? "em fase de tração saudável" : "precisando de ajustes de eficiência"}.`,
+    strategy: [
+      "Escala Incremental (V4): Não dobre o orçamento de uma vez. Aumente 15% a cada 2 dias para não 'quebrar' o aprendizado do algoritmo e manter o CAC sob controle.",
+      "Ponto de Rentabilidade: Calculamos que você tem margem para escalar. O foco deve ser em lucro limpo no bolso, equilibrando volume de vendas com custo de aquisição.",
+      "Frequência de Impacto (Kotler): Monitore a frequência. Não sature seu público com a mesma mensagem; se a frequência subir muito com o aumento da verba, mude o criativo."
+    ],
+    recommendation: isGood 
+      ? "Sinal Verde para Growth: O solo está fértil. Aumente o investimento gradualmente conforme planejado." 
+      : "Otimização Urgente: Você está pagando caro para vender pouco. Revise públicos e ofertas antes de injetar mais verba.",
+    keywordIdeas: ["escala consciente", "roas meta", "gestão de tráfego", "growth hacking"],
     isResilient: true,
     errorDetail: error
   };
 }
 
 function simulateRetentionWithJax(_behavior: AudienceBehavior, jax: any | null, error?: string): AiInsight {
+  const segmento = jax?.segmento || "Em Análise";
+  const rfm = jax?.rfm_score?.toFixed(2) || "N/A";
+
   return {
-    summary: `[MODO RESILIENTE] Segmento ${jax?.segmento || 'Identificado'}. O cliente fiel é a semente do seu império.`,
-    strategy: ["Campanha de Reativação Consciente.", "Experiência Holística (Kotler).", "Mural de Clientes: Celebre sua base."],
-    recommendation: "Urgência alta em reativar os campeões adormecidos.",
-    keywordIdeas: ["LTV", "Retenção AERM"],
+    summary: `[ESTRATEGISTA DE RETENÇÃO] Cliente classificado como "${segmento}" (RFM Score: ${rfm}). A retenção é o segredo do lucro exponencial no longo prazo.`,
+    strategy: [
+      segmento === "🏆 Campeão" 
+        ? "Fidelização de Elite: Mime quem sustenta o seu negócio. Ofereça benefícios exclusivos e acesso antecipado para garantir que o LTV continue subindo." 
+        : "Resgate de Legado: Use uma oferta de 'Win-back' agressiva para evitar o churn. Reduzir o churn de clientes inativos é 5x mais barato que adquirir novos.",
+      "Marketing de Relacionamento (Kotler): Trate o cliente como um ativo vivo. Use automação de e-mail personalizada baseada no tempo médio de recompra da sua base.",
+      "Aumento de Frequência: O lucro real mora na segunda e terceira compra. Introduza um 'Cross-sell' inteligente com base no histórico de compras do usuário."
+    ],
+    recommendation: segmento === "⚠️ Risco" 
+      ? "AÇÃO IMEDIATA: Este cliente está na zona de abandono. Ative uma campanha de reativação personalizada agora para salvar o LTV." 
+      : "Manutenção de Valor: Continue nutrindo este relacionamento para transformá-lo em um defensor da marca.",
+    keywordIdeas: ["retencão v4", "customer success", "marketing de fidelidade", "análise de rfm"],
     isResilient: true,
     errorDetail: error
   };
 }
 
 function simulateSeoWithJax(seoData: SeoResult, jax: any | null, error?: string): AiInsight {
-  const score = jax ? (jax.analysis?.score ?? jax.score ?? 0) : 50;
+  const ipm = jax?.analysis?.score ?? jax?.score ?? 0;
+  const classification = jax?.analysis?.classification ?? jax?.classification ?? (seoData.keywordData.cpc && seoData.keywordData.cpc > 2 ? "Mercado Maduro" : "Em Análise");
+  const keyword = seoData.keywordData?.keyword || 'Busca';
+
   return {
-    summary: `[MODO RESILIENTE] Potencial "${seoData.keywordData.keyword}": Nota ${Number(score).toFixed(0)}/100. Analisando a Alma desta busca.`,
-    strategy: ["Cultivo de Marca (Branding).", "Engajamento Profundo (Kotler).", "Monetização Consciente (V4)."],
-    recommendation: "Veredito: Construa autoridade antes de pedir a venda.",
-    keywordIdeas: [`${seoData.keywordData.keyword} guia`],
+    summary: `[ANÁLISE ESTRATÉGICA JAX] O termo "${keyword}" foi processado pelo motor de inteligência local. Identificamos um IPM (Index of Profitability) de ${ipm?.toLocaleString() || 0}, classificando este nicho como "${classification}".`,
+    strategy: [
+      classification === "Oceano Azul" 
+        ? `Dominação de Mercado (V4): Como o IPM de ${ipm} é extremamente alto, sua prioridade deve ser comprar 100% da "Share of Search". Não economize em lances; o retorno marginal aqui é superior a qualquer outro termo.` 
+        : `Diferenciação de nicho (Kotler): Em um mercado de ${classification}, a briga direta por preço é arriscada. Use o conceito de 'Marketing de Experiência' para criar conteúdo que posicione seu produto como a única escolha lógica para o problema do cliente.`,
+      `Autoridade Semântica Regenerativa: Não rankeie apenas para "${keyword}". Crie um cluster de conteúdo ao redor deste tema para provar aos buscadores que você é a autoridade máxima no assunto, reduzindo seu custo de aquisição orgânica a longo prazo.`,
+      `Funil de Conversão Consciente: O tráfego capturado por este termo deve ser direcionado para uma Landing Page de alta performance que minimize a fricção de compra. Se o IPM for moderado, o foco deve ser no 'Upsell' imediato para garantir o ROI de cada visita.`
+    ],
+    recommendation: ipm > 10000 
+      ? "INVESTIMENTO AGRESSIVO: Os dados matemáticos indicam uma oportunidade rara de ROI exponencial. Escalar imediatamente." 
+      : "OTIMIZAÇÃO TÁTICA: O mercado é competitivo. Mantenha os lances sob controle e foque na qualidade da página de destino para vencer pela conversão superior.",
+    keywordIdeas: keyword ? [`${keyword} preço`, `${keyword} melhor marca`, `como escolher ${keyword}`, `${keyword} custo benefício`, `guia completo ${keyword}`] : ["estratégia seo", "growth", "marketing digital"],
     isResilient: true,
     errorDetail: error
   };
 }
 
-export async function estimateSeoMetrics(keyword: string): Promise<SeoResult> {
+export async function estimateSeoMetrics(keyword: string, country: string = 'BR', engine: string = 'google'): Promise<SeoResult> {
+  // 1. Tentar Simulação Local via Motor JAX (O Cérebro da Casa)
+  const jaxSimulation = await callJax("keyword_simulation", { keyword, country, engine });
+  
+  if (jaxSimulation) {
+    return {
+      keywordData: {
+        keyword: jaxSimulation.keyword,
+        search_volume: jaxSimulation.search_volume,
+        cpc: jaxSimulation.cpc,
+        competition: jaxSimulation.competition,
+        competition_index: jaxSimulation.competition_index,
+        low_top_of_page_bid: jaxSimulation.cpc * 0.8,
+        high_top_of_page_bid: jaxSimulation.cpc * 1.5,
+        monthly_searches: [],
+        currency: jaxSimulation.currency,
+        engine: jaxSimulation.engine,
+        country: jaxSimulation.country
+      }
+    };
+  }
+
+  // 2. Se JAX falhar, tentar Gemini AI (Se houver chave)
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) return getMockSeoData(keyword);
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-    const response = await ai.models.generateContent({ 
-      model: GEMINI_MODEL, 
-      contents: formatPrompt(`Estime métricas SEO JSON Conscientes para: ${keyword}`) 
-    });
-    const data = JSON.parse(extractText(response).replace(/```json\n?|\n?```/g, '').trim());
-    data.isEstimated = true;
-    return data;
-  } catch { return getMockSeoData(keyword); }
+  if (apiKey) {
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({ 
+        model: GEMINI_MODEL, 
+        contents: formatPrompt(`Estime métricas SEO JSON Conscientes para: ${keyword}`) 
+      });
+      const data = JSON.parse(extractText(response).replace(/```json\n?|\n?```/g, '').trim());
+      data.isEstimated = true;
+      return data;
+    } catch { /* ignore and move to mock */ }
+  }
+
+  // 3. Fallback final para Dados Estáticos (Mock)
+  return getMockSeoData(keyword);
 }
 
 function getMockSeoData(keyword: string): SeoResult {

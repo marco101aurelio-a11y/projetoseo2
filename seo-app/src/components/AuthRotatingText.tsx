@@ -14,27 +14,25 @@ export function AuthRotatingText() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false); 
-      
+      setFade(false);
+
       setTimeout(() => {
         setIndex((current) => (current + 1) % phrases.length);
-        setFade(true); 
-      }, 300);
-      
-    }, 2500);
+        setFade(true);
+      }, 500);
+
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <span 
+    <span
       className={`
-        text-transparent bg-clip-text bg-gradient-to-r 
-        from-slate-700 to-slate-400 
-        dark:from-slate-200 dark:to-slate-500
-        transition-opacity duration-300 
-        inline-block min-w-[200px] text-left
-        ${fade ? 'opacity-100' : 'opacity-0'}
+        text-black font-display font-black
+        transition-all duration-700 
+        inline-block min-w-[320px] text-left
+        ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
       `}
     >
       {phrases[index]}

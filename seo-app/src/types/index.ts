@@ -13,6 +13,9 @@ export interface KeywordData {
   low_top_of_page_bid: number | null;
   high_top_of_page_bid: number | null;
   monthly_searches?: MonthlySearch[];
+  currency?: string;
+  engine?: string;
+  country?: string;
 }
 
 export interface SeoResult {
@@ -47,6 +50,31 @@ export interface AudienceBehavior {
   daysSinceLastVisit: number;
   purchasesInLastSemester: number;
   averageTicket: number;
+}
+
+export interface DreData {
+  receita_bruta: number;
+  investimento_ads: number;
+  custos_variaveis: {
+    total: number;
+    impostos: number;
+    frete: number;
+    comissao_mktp: number;
+    cogs_produto: number;
+  };
+  margem_contribuicao: number;
+  custos_fixos: number;
+  ebitda_final: number;
+}
+
+export interface FinanceResult {
+  summary: {
+    revenue: number;
+    ebitda: number;
+    ebitda_pct: number;
+    status: string;
+  };
+  detailed_dre: DreData;
 }
 
 export interface Project {
