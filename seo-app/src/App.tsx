@@ -53,6 +53,8 @@ export default function App() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="flex-1 flex flex-col overflow-hidden relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-slate-400/20 to-slate-600/20 ambient-bg pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-slate-300/10 to-slate-500/10 ambient-bg pointer-events-none" />
         <Header />
         
         <main className="flex-1 overflow-y-auto px-4 py-8 md:px-8 lg:px-12 pb-24 scrollbar-hide">
@@ -70,7 +72,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800 mb-12">
+                <div className="glass-panel p-6 sm:p-8 mb-12">
                   <SearchBar onSearch={handleSearch} isLoading={isSearching} />
                 </div>
 
@@ -103,7 +105,7 @@ export default function App() {
                       { title: 'Auditoria Instantânea', desc: 'Obtenha feedback imediato sobre o desempenho de qualquer página ou termo.' },
                       { title: 'Dados de Alta Precisão', desc: 'Integração em tempo real com a inteligência artificial exclusiva Capvi.' }
                     ].map((feature, i) => (
-                      <div key={i} className="bg-slate-100 dark:bg-slate-800/40 p-8 rounded-[2rem] hover:-translate-y-1 transition-transform duration-300 group cursor-default border border-slate-200 dark:border-slate-800">
+                      <div key={i} className="glass-panel p-8 hover:-translate-y-1 transition-transform duration-300 group cursor-default">
                         <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-2xl mb-4 flex items-center justify-center text-slate-900 dark:text-white font-black text-xl shadow-sm group-hover:scale-110 transition-transform">
                           {i + 1}
                         </div>
@@ -116,7 +118,7 @@ export default function App() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none mb-8 border border-slate-100 dark:border-slate-800">
+                <div className="glass-panel p-8 mb-8">
                   <img src="/capivara.png" alt="Capvi Logo" className="h-16 w-auto mix-blend-multiply dark:mix-blend-screen filter grayscale contrast-200 dark:invert dark:brightness-[300%] dark:contrast-[200%]" />
                 </div>
                 <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Módulo em Desenvolvimento</h2>

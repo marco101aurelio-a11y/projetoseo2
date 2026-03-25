@@ -25,4 +25,35 @@ export interface AiInsight {
   strategy: string[];
   recommendation: string;
   keywordIdeas: string[];
+  isResilient?: boolean;
+  errorDetail?: string;
+}
+
+export interface AdStats {
+  adName: string;
+  clicks: number;
+  conversions: number;
+  spend: number;
+}
+
+export interface CampaignData {
+  dailySpend: number;
+  roas: number;
+  targetRoas: number;
+  frequency: number;
+}
+
+export interface AudienceBehavior {
+  daysSinceLastVisit: number;
+  purchasesInLastSemester: number;
+  averageTicket: number;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  url: string;
+  description: string;
+  createdAt: string;
+  keywords: string[];
 }

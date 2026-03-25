@@ -1,0 +1,42 @@
+# Meta & Marketing Intelligence - Git Ignore
+
+# 📦 Dependências
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+
+# 🗑️ Lixo de Sistema e OS
+.DS_Store
+Thumbs.db
+.gemini/
+.agent/scratch/
+
+# 🛑 Datasets e Big Data (Lixo de Commit)
+*.csv
+*.xlsx
+*.xls
+*.zip
+*.json
+# Abrir exceção para o benchmark necessário
+!olist_benchmarks_v4.json
+
+# 🎥 Mídia Pesada (NÃO comitar vídeos no Git)
+*.mp4
+*.mov
+*.avi
+
+# 🏛️ Documentos Pesados (PPTX/PDF de clientes)
+# Recomendação: Armazenar em Google Drive/Dropbox
+documentos/**/*.pptx
+documentos/**/*.pdf
+# Abrir exceção para a Apostila V4 (Manual de referência)
+!documentos/V4COMPANY APOSTILA -  Logo Certo.pdf
+
+# 🔑 Segredos (Ambiente)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

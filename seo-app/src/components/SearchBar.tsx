@@ -1,41 +1,33 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
 import { Search, ArrowRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
+    if (query.trim() && !isLoading) {
       onSearch(query.trim());
     }
   };
 
   return (
-    <form 
-      onSubmit={handleSubmit} 
-      className="w-full max-w-3xl mx-auto relative group"
-    >
+    <form onSubmit={handleSubmit} className="w-full">
       <div className={cn(
-        "absolute inset-0 bg-gradient-to-r from-slate-300 to-slate-400 rounded-2xl blur opacity-20 transition-opacity duration-500",
-        isFocused ? "opacity-40" : "group-hover:opacity-30"
-      )} />
-      
-      <div className="relative flex items-center bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-all duration-300 focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-500/20">
-        <div className="pl-3 sm:pl-5 pr-2 sm:pr-3 text-slate-400">
-          <Search className={cn(
-            "w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-300",
-            isFocused ? "text-indigo-500" : "text-slate-400 dark:text-slate-500"
-          )} />
-        </div>
+        "flex items-center glass-panel px-4 sm:px-6 py-1 transition-all border border-transparent",
+        isFocused ? "ring-2 ring-slate-400/20 border-slate-300 dark:border-slate-600 shadow-md" : ""
+      )}>
+        <Search className={cn(
+          "w-5 h-5 transition-colors",
+          isFocused ? "text-slate-900 dark:text-white" : "text-slate-400"
+        )} />
         
         <input
           type="text"

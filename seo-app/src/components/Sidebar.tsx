@@ -24,6 +24,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
   const mainLinks = [
     { id: 'painel', label: 'Análise Palavras-Chave', icon: LayoutDashboard },
+    { id: 'projetos', label: 'Meus Projetos', icon: Settings },
     { id: 'conteudo', label: 'Análise de Conteúdo', icon: FileText },
     { id: 'amazon', label: 'Análise Amazon', icon: ShoppingCart },
     { id: 'backlinks', label: 'Análise Backlinks', icon: LinkIcon },

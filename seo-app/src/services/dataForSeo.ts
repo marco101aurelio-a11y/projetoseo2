@@ -1,4 +1,5 @@
 import type { SeoResult } from '../types';
+import { estimateSeoMetrics } from './gemini';
 
 // Replace these with actual DataForSEO endpoints and credentials
 const DATAFORSEO_API_URL = 'https://api.dataforseo.com/v3';
@@ -8,13 +9,15 @@ export async function fetchSeoData(keyword: string): Promise<SeoResult> {
   const password = import.meta.env.VITE_DATAFORSEO_PASSWORD;
 
   if (!login || !password) {
-    console.warn("DataForSEO credentials not found in .env. Returning mock data.");
-    return getMockData(keyword);
+    console.warn("DataForSEO credentials not found in .env. Returning AI Estimated data.");
+    return estimateSeoMetrics(keyword);
   }
 
   try {
     const post_array = [{
       keywords: [keyword],
+      location_name: "Brazil",
+      language_name: "Portuguese",
       sort_by: "relevance"
     }];
 
@@ -28,6 +31,10 @@ export async function fetchSeoData(keyword: string): Promise<SeoResult> {
     });
 
     if (!response.ok) {
+      if (response.status === 402) {
+        console.warn("DataForSEO balance exhausted. Falling back to AI estimation.");
+        return estimateSeoMetrics(keyword);
+      }
       throw new Error(`DataForSEO API error: ${response.statusText}`);
     }
 
@@ -38,7 +45,7 @@ export async function fetchSeoData(keyword: string): Promise<SeoResult> {
     const resultItem = taskResult?.[0]?.items ? taskResult[0]?.items?.[0] : taskResult?.[0];
     
     if (!resultItem) {
-      throw new Error("No data found for this keyword.");
+      return estimateSeoMetrics(keyword);
     }
 
     return {
@@ -55,44 +62,7 @@ export async function fetchSeoData(keyword: string): Promise<SeoResult> {
     };
 
   } catch (error) {
-    console.error("Error fetching SEO data:", error);
-    return getMockData(keyword); // Fallback to mock on error for MVP
+    console.error("Error fetching SEO data, using AI estimation:", error);
+    return estimateSeoMetrics(keyword);
   }
-}
-
-function getMockData(keyword: string): SeoResult {
-  return {
-    keywordData: {
-      keyword,
-      search_volume: Math.floor(Math.random() * 50000) + 1000,
-      cpc: Number((Math.random() * 5).toFixed(2)),
-      competition: "LOW",
-      competition_index: Math.floor(Math.random() * 100),
-      low_top_of_page_bid: Number((Math.random() * 2).toFixed(2)),
-      high_top_of_page_bid: Number((Math.random() * 8 + 2).toFixed(2)),
-      monthly_searches: []
-    },
-    relatedKeywords: [
-      {
-        keyword: `${keyword} comprar`,
-        search_volume: 12000,
-        cpc: 1.5,
-        competition: "HIGH",
-        competition_index: 85,
-        low_top_of_page_bid: 0.5,
-        high_top_of_page_bid: 4.5,
-        monthly_searches: []
-      },
-      {
-        keyword: `o que é ${keyword}`,
-        search_volume: 8500,
-        cpc: 0.5,
-        competition: "LOW",
-        competition_index: 12,
-        low_top_of_page_bid: 0.1,
-        high_top_of_page_bid: 1.2,
-        monthly_searches: []
-      }
-    ]
-  };
 }
