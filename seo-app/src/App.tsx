@@ -10,16 +10,18 @@ import { generateSeoInsights } from './services/gemini';
 import type { SeoResult, AiInsight } from './types';
 import { Bot } from 'lucide-react';
 import { Settings } from './components/Settings';
+import { Projects } from './components/Projects';
 
 import loginBg from './assets/galactic-bg.jpg';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('painel');
+  const [activeTab, setActiveTab] = useState('inicio');
   const [isSearching, setIsSearching] = useState(false);
   const [seoData, setSeoData] = useState<SeoResult | null>(null);
   const [aiInsights, setAiInsights] = useState<AiInsight | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarPinned, setIsSidebarPinned] = useState(true);
 
   const handleSearch = async (query: string) => {
     setIsSearching(true);
@@ -57,14 +59,14 @@ export default function App() {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
       
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isPinned={isSidebarPinned} setIsPinned={setIsSidebarPinned} />
 
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Header />
 
         <main className="flex-1 overflow-y-auto px-8 py-16 md:px-16 lg:px-24 pb-32 scrollbar-hide relative">
           <div className="max-w-[1400px] mx-auto w-full">
-            {activeTab === 'painel' ? (
+            {activeTab === 'seo-resultados' ? (
               <>
                 <div className="flex flex-col gap-10 mb-24">
                   <div className="max-w-4xl">
@@ -121,6 +123,8 @@ export default function App() {
               </>
             ) : activeTab === 'config' ? (
               <Settings />
+            ) : activeTab === 'projetos' ? (
+              <Projects onSidebarClose={() => setIsSidebarPinned(false)} />
             ) : (
               <div className="flex flex-col items-start justify-center h-[60vh] text-left animate-in fade-in slide-in-from-bottom-12 duration-1000">
                 <div className="bg-surface-container-highest w-20 h-20 rounded-[2rem] mb-12 flex items-center justify-center border border-white/10">

@@ -33,8 +33,8 @@ export function Auth({ onLogin }: AuthProps) {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
           
           <div className="flex flex-col items-center mb-16 text-center">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-8 shadow-2xl border-2 border-black/5 overflow-hidden">
-              <img src="/logo-capvi.png" alt="Capvi Mascot" className="w-12 h-12 object-contain brightness-0" />
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-8 shadow-2xl border-2 border-black/5 overflow-hidden">
+              <img src="/logo-capvi.png" alt="Capvi Mascot" className="w-20 h-20 object-contain brightness-0" />
             </div>
             
             <h1 className="text-4xl font-black text-black tracking-tight mb-2">
