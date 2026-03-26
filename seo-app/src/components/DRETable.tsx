@@ -11,7 +11,7 @@ const DRETable: React.FC<DRETableProps> = ({ data }) => {
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   return (
-    <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl">
+    <div className="bg-surface-container-low rounded-[2rem] overflow-hidden">
       <div className="p-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div className="flex items-center gap-6">
           <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center">

@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pandas
+numpy
+python-dotenv
+jax
+jaxlib
+keras-nlp
+keras
+fastapi
+uvicorn
+requests

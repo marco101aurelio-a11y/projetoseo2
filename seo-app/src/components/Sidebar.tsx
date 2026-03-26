@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   LayoutDashboard,
-  Search,
   BarChart2,
   Settings,
   Database,
@@ -18,20 +17,28 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const [isPinned, setIsPinned] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const isExpanded = isPinned || isHovered;
 
   const navLinks = [
     { id: 'painel', label: 'Painel Geral', icon: LayoutDashboard },
     { id: 'projetos', label: 'Meus Projetos', icon: Database },
     { id: 'insights', label: 'Insights Capvi', icon: BarChart2 },
     { id: 'equipe', label: 'Minha Equipe', icon: Users },
-    { id: 'config', label: 'Configurações', icon: Settings },
   ];
 
+  const configLink = { id: 'config', label: 'Configurações', icon: Settings };
+
   return (
-    <aside className={cn(
-      "h-screen bg-white/5 backdrop-blur-[24px] border-r border-white/5 transition-all duration-500 flex flex-col items-center py-10 group relative z-50",
-      isPinned ? "w-80" : "w-24"
-    )}>
+    <aside 
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={cn(
+        "h-screen bg-white/5 backdrop-blur-[24px] border-r border-white/5 transition-all duration-700 ease-in-out flex flex-col items-center py-10 group relative z-50",
+        isExpanded ? "w-80" : "w-24"
+      )}
+    >
       {/* Pin Toggle Button */}
       <button
         onClick={() => setIsPinned(!isPinned)}
@@ -40,22 +47,25 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         {isPinned ? <Pin size={10} /> : <PinOff size={10} />}
       </button>
 
-      <div className="w-full px-6 flex flex-col items-start h-full">
+      <div className={cn(
+        "w-full flex flex-col items-start h-full transition-all duration-700",
+        isExpanded ? "px-6" : "px-4"
+      )}>
         {/* Logo Area */}
         <div className={cn(
           "mb-20 transition-all flex items-center justify-start w-full",
-          isPinned ? "px-2" : "justify-center"
+          isExpanded ? "px-2" : "justify-center"
         )}>
-          {isPinned ? (
+          {isExpanded ? (
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <Search className="w-5 h-5 text-black" />
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-white/10 group-hover:scale-105 transition-all duration-500">
+                <img src="/logo-capvi.png" alt="Capvi Mascot" className="w-10 h-10 object-contain p-1 brightness-0" />
               </div>
               <span className="font-display font-black text-2xl tracking-tighter text-white">Capvi OS</span>
             </div>
           ) : (
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-              <Search className="w-6 h-6 text-black" />
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-white/10 hover:scale-110 transition-all duration-500">
+              <img src="/logo-capvi.png" alt="Capvi Mascot" className="w-10 h-10 object-contain p-1 brightness-0" />
             </div>
           )}
         </div>
@@ -71,18 +81,19 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
                 key={link.id}
                 onClick={() => setActiveTab(link.id)}
                 className={cn(
-                  "relative w-full flex items-center gap-5 px-5 py-4 rounded-full transition-all group overflow-hidden",
+                  "relative w-full flex items-center rounded-full transition-all group overflow-hidden transition-all duration-500",
+                  isExpanded ? "gap-5 px-5 py-4" : "justify-center py-4 px-0",
                   isActive
                     ? "bg-white/10 text-white shadow-2xl shadow-black/40 font-bold border border-white/10"
                     : "text-white/60 hover:text-white hover:bg-white/5 font-medium"
                 )}
-                title={!isPinned ? link.label : undefined}
+                title={!isExpanded ? link.label : undefined}
               >
                 <Icon className={cn("w-6 h-6 flex-shrink-0 transition-transform group-hover:scale-110", isActive && "text-white")} />
 
                 <span className={cn(
-                  "whitespace-nowrap transition-all duration-500 text-left text-xs uppercase tracking-widest font-black",
-                  isPinned ? "opacity-100" : "w-0 opacity-0"
+                  "whitespace-nowrap transition-all duration-500 text-left text-xs uppercase tracking-widest font-black leading-none",
+                  isExpanded ? "opacity-100 translate-x-0 w-auto" : "opacity-0 -translate-x-4 w-0"
                 )}>
                   {link.label}
                 </span>
@@ -90,6 +101,30 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             );
           })}
         </nav>
+
+        {/* Footer Configuration */}
+        <div className="w-full pt-10 border-t border-white/5 mt-auto">
+          <button
+            onClick={() => setActiveTab(configLink.id)}
+            className={cn(
+              "relative w-full flex items-center rounded-full transition-all group overflow-hidden transition-all duration-500",
+              isExpanded ? "gap-5 px-5 py-4" : "justify-center py-4 px-0",
+              activeTab === configLink.id
+                ? "bg-white/10 text-white shadow-2xl shadow-black/40 font-bold border border-white/10"
+                : "text-white/60 hover:text-white hover:bg-white/5 font-medium"
+            )}
+            title={!isExpanded ? configLink.label : undefined}
+          >
+            <configLink.icon className={cn("w-6 h-6 flex-shrink-0 transition-transform group-hover:scale-110", activeTab === configLink.id && "text-white")} />
+
+            <span className={cn(
+              "whitespace-nowrap transition-all duration-500 text-left text-xs uppercase tracking-widest font-black leading-none",
+              isExpanded ? "opacity-100 translate-x-0 w-auto" : "opacity-0 -translate-x-4 w-0"
+            )}>
+              {configLink.label}
+            </span>
+          </button>
+        </div>
       </div>
     </aside>
   );

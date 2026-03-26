@@ -126,7 +126,7 @@ const WaterfallChart: React.FC<{ data: DreData }> = ({ data }) => {
   });
 
   return (
-    <div className="bg-white/5 backdrop-blur-2xl p-10 rounded-[2.5rem] border border-white/10 h-96 flex flex-col group transition-all duration-500 hover:scale-[1.01] hover:bg-white/10">
+    <div className="bg-surface-container-low rounded-[3rem] p-10 h-[500px] flex flex-col relative overflow-hidden group">
       <div className="flex items-center justify-between mb-10">
         <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
           <TrendingUp className="w-5 h-5 opacity-40" />

@@ -97,7 +97,7 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
               <Bot className="w-5 h-5 text-black" />
             </div>
-            <h3 className="font-display font-bold text-xl tracking-tight text-white">IA Estratégica</h3>
+            <h3 className="font-display font-black text-3xl tracking-tight text-white italic">Capvi IA</h3>
           </div>
 
           <div className="flex flex-wrap gap-2 bg-white/5 p-1.5 rounded-full border border-white/10">
@@ -113,7 +113,7 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
                 onClick={() => handleProfileSwitch(tab.id as AiProfile)}
                 disabled={isGenerating}
                 className={cn(
-                  "flex items-center gap-2 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
+                  "flex items-center gap-3 px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-[0.2em] transition-all",
                   activeProfile === tab.id
                     ? "bg-white text-black shadow-lg"
                     : "text-white/40 hover:text-white hover:bg-white/5"
@@ -129,7 +129,7 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
         {isGenerating ? (
           <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-32 flex flex-col items-center justify-center border border-white/10">
             <Loader2 className="w-12 h-12 text-white animate-spin mb-6" />
-            <p className="text-white/40 font-bold uppercase tracking-widest text-xs">Capvi IA está raciocinando...</p>
+            <p className="text-white/40 font-black uppercase tracking-[0.4em] text-sm animate-pulse">Capvi IA está raciocinando...</p>
           </div>
         ) : (
           <div className="space-y-12">
@@ -175,9 +175,9 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
                     </p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-2xl rounded-[3rem] p-10 border border-white/10 shadow-2xl">
-                    <h4 className="font-black text-white/40 mb-6 text-[10px] uppercase tracking-[0.2em]">Veredito Baseado em Dados</h4>
-                    <p className="font-display font-extrabold text-2xl leading-snug text-white">
+                  <div className="bg-white text-black rounded-[3rem] p-10 shadow-2xl">
+                    <h4 className="font-black opacity-40 mb-6 text-[10px] uppercase tracking-[0.2em]">Veredito Baseado em Dados</h4>
+                    <p className="font-display font-extrabold text-2xl leading-snug">
                       {localInsights.recommendation}
                     </p>
                   </div>

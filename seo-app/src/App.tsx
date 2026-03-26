@@ -9,6 +9,9 @@ import { fetchSeoData } from './services/dataForSeo';
 import { generateSeoInsights } from './services/gemini';
 import type { SeoResult, AiInsight } from './types';
 import { Bot } from 'lucide-react';
+import { Settings } from './components/Settings';
+
+import loginBg from './assets/galactic-bg.jpg';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -44,34 +47,39 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-black text-white transition-colors duration-500 overflow-hidden font-sans selection:bg-white selection:text-black relative">
-      {/* Galactic Background Blobs */}
-      <div className="galactic-glow-blue top-[-10%] right-[-10%] opacity-30" />
-      <div className="galactic-glow-orange bottom-[20%] left-[-10%] opacity-20" />
-      <div className="galactic-glow-teal top-[40%] right-[20%] opacity-10" />
+      {/* Unified Background Image Layer */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 scale-105 opacity-50 blur-[8px]"
+        style={{ backgroundImage: `url(${loginBg})` }}
+      />
+      
+      {/* Heavy Atmospheric Fog/Overlay to reduce grain */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
       
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Header />
 
-        <main className="flex-1 overflow-y-auto px-8 py-8 md:px-16 lg:px-24 pb-20 scrollbar-hide relative">
+        <main className="flex-1 overflow-y-auto px-8 py-16 md:px-16 lg:px-24 pb-32 scrollbar-hide relative">
           <div className="max-w-[1400px] mx-auto w-full">
             {activeTab === 'painel' ? (
               <>
-                <div className="flex flex-col gap-8 mb-12">
+                <div className="flex flex-col gap-10 mb-24">
                   <div className="max-w-4xl">
-                    <span className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-4 block">Intelligence Platform</span>
-                    <h1 className="display-lg text-white mb-6 leading-[1.05]">
+                    <span className="text-xs font-black uppercase tracking-[0.3em] text-white/40 mb-6 block">Intelligence Platform</span>
+                    <h1 className="display-lg text-white mb-8 leading-[1.05]">
                       Dados para escalar seu <br />
                       <span className="inline-block mt-2"><RotatingText /></span>
                     </h1>
-                    <p className="text-lg text-white/60 font-medium max-w-2xl leading-relaxed">
+                    <p className="text-xl text-white/60 font-medium max-w-2xl leading-relaxed">
                       Descubra as palavras-chave mais rentáveis e domine o seu mercado através de uma interface de precisão etérea.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-8 mb-10 shadow-[0_40px_80px_rgba(0,0,0,0.4)] border border-white/10 focus-within:bg-white/10 transition-all duration-500">
+                <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-10 mb-20 shadow-[0_40px_80px_rgba(0,0,0,0.4)] border border-white/10 focus-within:bg-white/10 transition-all duration-500">
                   <SearchBar onSearch={handleSearch} isLoading={isSearching} />
                 </div>
 
@@ -111,9 +119,11 @@ export default function App() {
                   </div>
                 )}
               </>
+            ) : activeTab === 'config' ? (
+              <Settings />
             ) : (
               <div className="flex flex-col items-start justify-center h-[60vh] text-left animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                <div className="bg-white/10 w-20 h-20 rounded-[2rem] mb-12 flex items-center justify-center border border-white/10">
+                <div className="bg-surface-container-highest w-20 h-20 rounded-[2rem] mb-12 flex items-center justify-center border border-white/10">
                   <Bot className="w-10 h-10 text-white opacity-40" />
                 </div>
                 <h2 className="display-lg text-white mb-8 underline decoration-white/10 decoration-4 underline-offset-8">Módulo em Desenvolvimento</h2>
