@@ -69,9 +69,9 @@ export function Sidebar({ activeTab, setActiveTab, isPinned: externalIsPinned, s
       {/* Pin Toggle Button */}
       <button
         onClick={() => setIsPinned(!isPinned)}
-        className="absolute -right-3 top-32 bg-white text-black rounded-full p-1.5 shadow-xl z-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+        className="absolute -right-3 top-32 bg-white text-black rounded-full p-2 shadow-xl z-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 flex items-center justify-center border border-black/10"
       >
-        {isPinned ? <Pin size={10} /> : <PinOff size={10} />}
+        {isPinned ? <Pin size={16} /> : <PinOff size={16} />}
       </button>
 
       <div className={cn(
