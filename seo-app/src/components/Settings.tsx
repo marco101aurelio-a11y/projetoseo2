@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mic, ShieldCheck, Key, CreditCard, CheckCircle2, Globe, Mail, Lock, Edit2, Save, X } from 'lucide-react';
+import { User, Mic, ShieldCheck, Key, CreditCard, Check, Globe, Mail, Lock, Edit2, Save } from 'lucide-react';
 
 export function Settings() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -82,7 +82,7 @@ export function Settings() {
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white text-black rounded-full flex items-center justify-center shadow-2xl scale-0 group-hover:scale-100 transition-all duration-500 delay-100">
-                <CheckCircle2 size={16} />
+                <Check size={16} />
               </div>
             </div>
             

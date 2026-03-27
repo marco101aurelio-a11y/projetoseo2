@@ -12,7 +12,8 @@ import {
   Link,
   ShoppingCart,
   Store,
-  Box
+  Box,
+  Package
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -50,7 +51,8 @@ export function Sidebar({ activeTab, setActiveTab, isPinned: externalIsPinned, s
         { id: 'seo-produtos', label: 'Análise Produtos', icon: ShoppingCart },
         { id: 'seo-marketplace', label: 'Marketplace', icon: Store },
       ]
-    }
+    },
+    { id: 'drop', label: 'CAPVI DROP', icon: Package }
   ];
 
   const configLink = { id: 'config', label: 'Configurações', icon: Settings };
