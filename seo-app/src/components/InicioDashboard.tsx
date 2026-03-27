@@ -151,7 +151,7 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
                   <PenTool className="w-5 h-5 text-white/60" />
                 </div>
              </div>
-             <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar">
+             <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-2 no-scrollbar">
                 {[
                   "Revisar backlinks do Projeto SEO",
                   "Ajustar meta tags da Home",

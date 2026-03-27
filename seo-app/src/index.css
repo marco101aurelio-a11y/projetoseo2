@@ -118,15 +118,10 @@
   animation: waddle 0.5s ease-in-out infinite;
 }
 
-/* 1.1 Barra de rolagem global (Esconder a branca padrão) */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
-}
-
+/* 1.1 Barra de rolagem dark / Stealth Scrollbars */
 *::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 *::-webkit-scrollbar-track {
@@ -134,35 +129,43 @@
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.05); /* Quase invisível */
   border-radius: 20px;
-  border: 2px solid transparent;
+  transition: background-color 0.3s ease;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15); /* Sutil ao hover */
 }
 
-/* Esconder completamente em elementos específicos se necessário */
+/* Remover botões/setas no Windows */
+*::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Firefox support - Stealth */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+}
+
+/* Classe utilitária para Ocultação Total (Preservando Funcionalidade) */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none; /* IE e Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-/* Custom Scrollbar Premium */
+/* Custom Scrollbar Premium (hover mais visível para elementos scrolláveis interativos) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
   border-radius: 20px;
 }
 
