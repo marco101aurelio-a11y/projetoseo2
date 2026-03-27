@@ -31,16 +31,41 @@ VITE_DATAFORSEO_PASSWORD=sua_senha
 ```
 
 ### 3. Configurar o Motor Matemático (JAX Backend)
-O "coração" dos cálculos roda em Python. Certifique-se de ter o Python 3.10+ instalado.
-1. Vá para a pasta do analytics (fora do seo-app).
-2. Instale as dependências:
-```bash
-pip install jax jaxlib fastapi uvicorn
-```
-3. Inicie o servidor local:
-```bash
-python main_api.py
-```
+O "coração" dos cálculos roda em Python 3.10+. Para ligar manualmente em uma nova máquina:
+
+1. **Vá para a pasta do motor:**
+   ```bash
+   cd olist-analytics-local
+   ```
+
+2. **Crie um ambiente virtual (Recomendado):**
+   ```bash
+   python3 -m venv .venv
+   ```
+
+3. **Ative o ambiente:**
+   - No Mac/Linux: `source .venv/bin/activate`
+   - No Windows: `.venv\Scripts\activate`
+
+4. **Instale as dependências:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *Se o `pip` não for encontrado, tente `python3 -m pip install -r requirements.txt`.*
+
+5. **Inicie o servidor de API:**
+   ```bash
+   python3 src/main_api.py
+   ```
+   *O backend estará rodando em `http://0.0.0.0:8000`. Ele já está configurado para aceitar conexões de outros dispositivos na mesma rede.*
+
+---
+
+### 🌐 Acesso em Outros Dispositivos (Rede Local)
+Para abrir o app em outro celular/PC na mesma rede:
+1. **Frontend:** Rode `npm run dev -- --host` na pasta `seo-app`.
+2. **API:** No arquivo `seo-app/src/services/gemini.ts`, troque `127.0.0.1` pelo **IP Local** da sua máquina principal.
+3. **Acesse:** Use o IP mostrado no terminal (ex: `http://192.168.1.15:5173`).
 
 ### 4. Rodar o Aplicativo
 Com o backend Python rodando na porta **8000**, inicie o frontend:
