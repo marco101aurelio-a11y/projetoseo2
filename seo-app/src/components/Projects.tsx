@@ -3,15 +3,24 @@ import { Search, Check, LayoutGrid, List, ChevronDown, Plus, MoreVertical } from
 import { cn } from '../lib/utils';
 import { ProjectView } from './ProjectView';
 
-export function Projects({ onSidebarClose }: { onSidebarClose?: () => void }) {
+export interface ProjectData {
+  id: number;
+  title: string;
+  date: string;
+  sources: number;
+}
+
+export function Projects({ 
+  onSidebarClose, 
+  projects, 
+  setProjects 
+}: { 
+  onSidebarClose?: () => void;
+  projects: ProjectData[];
+  setProjects: (projects: ProjectData[]) => void;
+}) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
-
-  const [projects, setProjects] = useState([
-    { id: 1, title: 'Análise de Concorrentes 2025', date: '10 de nov. de 2024', sources: 12 },
-    { id: 2, title: 'Estratégia SEO Black Friday', date: '22 de out. de 2024', sources: 8 },
-    { id: 3, title: 'Auditoria Técnica Blog', date: '5 de set. de 2024', sources: 4 },
-  ]);
 
   if (selectedProject) {
     return <ProjectView project={selectedProject} onBack={() => setSelectedProject(null)} />;

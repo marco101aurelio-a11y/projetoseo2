@@ -53,10 +53,10 @@ export function ProjectView({ project, onBack }: ProjectViewProps) {
       </div>
 
       {/* 3 Columns Layout */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-[600px] h-[75vh]">
+      <div className="flex-1 flex flex-col xl:flex-row gap-6 min-h-[70vh] h-[calc(100vh-240px)]">
 
         {/* Left Column: Fontes */}
-        <div className="w-full lg:w-1/4 lg:min-w-[320px] bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-6 flex flex-col shadow-2xl relative overflow-hidden">
+        <div className="w-full xl:w-[320px] shrink-0 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-6 flex flex-col shadow-2xl relative overflow-hidden">
           <div className="flex items-center justify-between mb-6 z-10">
             <h3 className="font-display font-black text-xl text-white">Fontes</h3>
             <button className="p-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl transition-colors">
@@ -126,7 +126,7 @@ export function ProjectView({ project, onBack }: ProjectViewProps) {
         </div>
 
         {/* Right Column: Estúdio */}
-        <div className="w-full lg:w-1/4 lg:min-w-[340px] bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-6 lg:p-8 flex flex-col relative shadow-2xl">
+        <div className="w-full xl:w-[380px] shrink-0 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-6 lg:p-8 flex flex-col relative shadow-2xl">
           <div className="flex items-center justify-between mb-10">
             <h3 className="font-display font-black text-xl text-white">Estúdio</h3>
             <button className="p-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl transition-colors">

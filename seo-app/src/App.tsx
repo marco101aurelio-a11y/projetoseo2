@@ -11,6 +11,7 @@ import type { SeoResult, AiInsight } from './types';
 import { Bot } from 'lucide-react';
 import { Settings } from './components/Settings';
 import { Projects } from './components/Projects';
+import { InicioDashboard } from './components/InicioDashboard';
 
 import loginBg from './assets/galactic-bg.jpg';
 
@@ -22,6 +23,12 @@ export default function App() {
   const [aiInsights, setAiInsights] = useState<AiInsight | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarPinned, setIsSidebarPinned] = useState(true);
+
+  const [projects, setProjects] = useState([
+    { id: 1, title: 'Análise de Concorrentes 2025', date: '10 de nov. de 2024', sources: 12 },
+    { id: 2, title: 'Estratégia SEO Black Friday', date: '22 de out. de 2024', sources: 8 },
+    { id: 3, title: 'Auditoria Técnica Blog', date: '5 de set. de 2024', sources: 4 },
+  ]);
 
   const handleSearch = async (query: string) => {
     setIsSearching(true);
@@ -64,8 +71,8 @@ export default function App() {
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Header />
 
-        <main className="flex-1 overflow-y-auto px-8 py-16 md:px-16 lg:px-24 pb-32 scrollbar-hide relative">
-          <div className="max-w-[1400px] mx-auto w-full">
+        <main className="flex-1 overflow-y-auto px-6 lg:px-12 py-8 scroll-smooth pb-24">
+          <div className="w-full max-w-[1920px] mx-auto h-full text-white">
             {activeTab === 'seo-resultados' ? (
               <>
                 <div className="flex flex-col gap-10 mb-24">
@@ -124,7 +131,9 @@ export default function App() {
             ) : activeTab === 'config' ? (
               <Settings />
             ) : activeTab === 'projetos' ? (
-              <Projects onSidebarClose={() => setIsSidebarPinned(false)} />
+              <Projects projects={projects} setProjects={setProjects} onSidebarClose={() => setIsSidebarPinned(false)} />
+            ) : activeTab === 'inicio' ? (
+              <InicioDashboard projects={projects} setActiveTab={setActiveTab} />
             ) : (
               <div className="flex flex-col items-start justify-center h-[60vh] text-left animate-in fade-in slide-in-from-bottom-12 duration-1000">
                 <div className="bg-surface-container-highest w-20 h-20 rounded-[2rem] mb-12 flex items-center justify-center border border-white/10">
