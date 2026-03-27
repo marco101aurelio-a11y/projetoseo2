@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# 💻 Capvi SEO — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este é o frontend do acelerador de lucratividade Capvi SEO, construído com **React**, **Vite**, **TypeScript** e **Tailwind CSS**.
 
-Currently, two official plugins are available:
+## 🚀 Como Iniciar (Desenvolvimento Local)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. **Instalar dependências:**
+   ```bash
+   npm install
+   ```
 
-## React Compiler
+2. **Iniciar o servidor de desenvolvimento:**
+   ```bash
+   npm run dev
+   ```
+   O app estará disponível em `http://localhost:5173`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🔗 Conexão com o Backend (Motor JAX)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+O frontend se comunica com o Motor JAX (Python/FastAPI) que, por padrão, roda na porta **8000**.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+A configuração da URL da API fica no arquivo:
+`src/services/gemini.ts`
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```typescript
+// Exemplo de chamada
+const response = await fetch(`http://127.0.0.1:8000/analyze/${endpoint}`, { ... });
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🌐 Acesso em Outros Dispositivos (Rede Local)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Se você quiser abrir o Capvi SEO em outro computador, tablet ou celular na mesma rede:
+
+### 1. Descubra seu IP Local
+No terminal do seu computador principal (Mac):
+```bash
+ipconfig getifaddr en0
 ```
+*(Exemplo de retorno: 192.168.1.15)*
+
+### 2. Prepare o Backend (Motor JAX)
+O backend já está configurado para aceitar conexões externas (`host="0.0.0.0"`). Apenas garanta que ele esteja rodando.
+
+### 3. Exponha o Frontend
+Rode o frontend com a flag `--host`:
+```bash
+npm run dev -- --host
+```
+Isso permitirá que outros dispositivos acessem o Vite via seu IP.
+
+### 4. Atualize a URL da API no Frontend
+No arquivo `src/services/gemini.ts`, troque `127.0.0.1` pelo seu **IP Local**:
+```typescript
+// Mude de:
+// http://127.0.0.1:8000/analyze/
+// Para:
+const response = await fetch(`http://192.168.1.15:8000/analyze/${endpoint}`, { ... });
+```
+
+### 5. Acesse no outro dispositivo
+Abra o navegador no celular/outro PC e digite:
+`http://192.168.1.15:5173`
+
+> [!TIP]
+> **Dica de Produção:** Futuramente, você pode usar um arquivo `.env` com a variável `VITE_JAX_API_URL` para facilitar essa troca sem mexer no código core.
