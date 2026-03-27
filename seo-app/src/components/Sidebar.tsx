@@ -52,7 +52,6 @@ export function Sidebar({ activeTab, setActiveTab, isPinned: externalIsPinned, s
         { id: 'seo-marketplace', label: 'Marketplace', icon: Store },
       ]
     },
-    { id: 'drop', label: 'CAPVI DROP', icon: Package }
   ];
 
   const configLink = { id: 'config', label: 'Configurações', icon: Settings };
