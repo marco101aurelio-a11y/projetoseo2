@@ -27,6 +27,17 @@ export async function callJax(endpoint: string, body: any): Promise<any | null> 
   }
 }
 
+export async function getBenchmarks(): Promise<any | null> {
+  try {
+    const response = await fetch(`http://127.0.0.1:8000/analyze/benchmarks`);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (err) {
+    console.error("Falha ao buscar benchmarks Olist:", err);
+    return null;
+  }
+}
+
 function validateInsight(data: any, keyword: string, isResilient = false, errorDetail?: string): AiInsight {
   return {
     summary: data?.summary || "Análise estratégica em profundidade concluída.",
@@ -105,6 +116,7 @@ export async function generateFinanceInsights(dre: FinanceResult): Promise<AiIns
       - EBITDA Final: R$ ${dre.detailed_dre.ebitda_final} (${dre.summary.ebitda_pct.toFixed(1)}%)
       - Investimento em Ads: R$ ${dre.detailed_dre.investimento_ads}
       - Status JAX: ${dre.summary.status}
+      - Benchmark Olist (Ticket Médio Real): R$ ${dre.summary.real_ticket_medio}
     `;
     
     const prompt = `

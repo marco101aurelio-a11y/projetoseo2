@@ -47,6 +47,8 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
         const mock: AudienceBehavior = { daysSinceLastVisit: 55, purchasesInLastSemester: 3, averageTicket: 499.00 };
         setLocalInsights(await generateChurnPredictor(mock));
       } else if (profile === 'finance') {
+        const b = await callJax("benchmarks", {});
+        const ticketMedio = b?.avg_monetary || 141.62;
         const investment = (seoData?.keywordData.search_volume || 1000) * (seoData?.keywordData.cpc || 1) * 0.1;
         const result = await callJax("dre", {
           investment: investment > 0 ? investment : 5000,
@@ -136,7 +138,7 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
             {activeProfile === 'finance' && financeData && (
               <div className="animate-in fade-in slide-in-from-top-8 duration-700">
                 <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-8 md:p-12 shadow-2xl border border-white/10">
-                  <DRETable data={financeData.detailed_dre} />
+                  <DRETable data={financeData.detailed_dre} benchmarks_applied={financeData.benchmarks_applied} />
                 </div>
                 <div className="mt-12">
                   <FinancialVisuals data={financeData.detailed_dre} ebitda_pct={financeData.summary.ebitda_pct} roas={4.8} />

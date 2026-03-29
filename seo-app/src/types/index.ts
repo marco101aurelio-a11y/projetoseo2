@@ -73,8 +73,10 @@ export interface FinanceResult {
     ebitda: number;
     ebitda_pct: number;
     status: string;
+    real_ticket_medio?: number;
   };
   detailed_dre: DreData;
+  benchmarks_applied?: any;
 }
 
 export interface Project {

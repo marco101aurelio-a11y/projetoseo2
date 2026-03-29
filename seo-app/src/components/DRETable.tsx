@@ -1,26 +1,30 @@
-import { TrendingUp, TrendingDown, DollarSign, Package } from 'lucide-react';
+import { TrendingUp, TrendingDown, Package } from 'lucide-react';
 import type { DreData } from '../types';
 import { cn } from '../lib/utils';
 
 interface DRETableProps {
   data: DreData;
+  benchmarks_applied?: any;
 }
 
-const DRETable: React.FC<DRETableProps> = ({ data }) => {
+const DRETable: React.FC<DRETableProps> = ({ data, benchmarks_applied }) => {
   const formatCurrency = (value: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   return (
     <div className="bg-surface-container-low rounded-[2rem] overflow-hidden">
-      <div className="p-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-        <div className="flex items-center gap-6">
-          <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center">
-            <DollarSign className="w-6 h-6 text-black" />
-          </div>
+      <div className="p-10">
+        <div className="flex justify-between items-center mb-10">
           <div>
-            <h3 className="font-display font-black text-2xl text-white">Demonstrativo Financeiro</h3>
-            <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.2em]">Análise de Fluxo JAX</p>
+            <h3 className="text-3xl font-display font-black text-white italic">DRE Projetado</h3>
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mt-2">Modelo V4 Company • AERM</p>
           </div>
+          {benchmarks_applied && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+               <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
+               <span className="text-[9px] font-black text-indigo-300 uppercase tracking-widest">Olist Benchmark Ativo</span>
+            </div>
+          )}
         </div>
         <span className={cn(
           "px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest",

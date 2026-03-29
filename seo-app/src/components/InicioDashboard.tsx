@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Play, Bot, Activity, Check, ArrowRight, ClipboardList, PenTool, Layout, Terminal, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { ProjectData } from './Projects';
+import { getBenchmarks } from '../services/gemini';
 
 interface InicioDashboardProps {
   projects: ProjectData[];
@@ -41,11 +42,19 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
 
   // 1.4.1 Carousel Logic (Rotina frases)
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [benchmarks, setBenchmarks] = useState<any>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCarouselIndex((prev) => (prev + 1) % carouselTexts.length);
     }, 2000);
+
+    const loadBenchmarks = async () => {
+      const data = await getBenchmarks();
+      setBenchmarks(data);
+    };
+    loadBenchmarks();
+
     return () => clearInterval(interval);
   }, []);
 
@@ -92,6 +101,24 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
              />
              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/90 via-[#0a0a0a]/30 to-transparent z-10" />
+             <div className="absolute bottom-8 left-8 z-20">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50 mb-2 block">DADOS REAIS</span>
+                <h2 className="text-4xl font-display font-black text-white italic">Olist Intelligence</h2>
+                <div className="flex gap-6 mt-4">
+                   <div className="flex flex-col">
+                      <span className="text-2xl font-black text-indigo-400">{benchmarks?.total_customers?.toLocaleString() || "..."}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-white/30">Clientes</span>
+                   </div>
+                   <div className="flex flex-col border-l border-white/10 pl-6">
+                      <span className="text-2xl font-black text-purple-400">R$ {benchmarks?.avg_monetary?.toFixed(2) || "..."}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-white/30">Ticket Médio</span>
+                   </div>
+                   <div className="flex flex-col border-l border-white/10 pl-6">
+                      <span className="text-2xl font-black text-green-400">{benchmarks?.avg_frequency?.toFixed(2) || "..."}x</span>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-white/30">Frequência</span>
+                   </div>
+                </div>
+             </div>
           </div>
 
           {/* Automação Carousel - 1 col wide, 1 tall */}
