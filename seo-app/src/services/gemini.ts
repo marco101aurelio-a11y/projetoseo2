@@ -53,7 +53,8 @@ function formatPrompt(text: string) {
   return [{ role: 'user', parts: [{ text }] }];
 }
 
-const GEMINI_MODEL = "gemini-flash-latest";
+// Usando o modelo 1.5-flash: é absurdamente rápido, barato e estável em todas as rotas
+const GEMINI_MODEL = "gemini-1.5-flash";
 
 function extractText(response: any): string {
   if (!response) return "";
@@ -185,6 +186,32 @@ export async function generateChurnPredictor(behavior: AudienceBehavior): Promis
     const data = JSON.parse(extractText(response).replace(/```json\n?|\n?```/g, '').trim());
     return validateInsight(data, "Retenção", false);
   } catch (e: any) { return simulateRetentionWithJax(behavior, jax, e?.message); }
+}
+
+// --- CHAT DINÂMICO DOS AGENTES NO ESTÚDIO (VIA BACKEND PYTHON) ---
+export async function chatWithAgent(agentName: string, chatHistory: any[], userInput: string): Promise<string> {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/agent/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agent_name: agentName,
+        chat_history: chatHistory,
+        user_input: userInput
+      })
+    });
+    
+    if (!response.ok) {
+      if (response.status === 404) return "[Sistema] O Backend JAX não encontrou a rota /agent/chat. Reinicie o servidor Python.";
+      return `[Sistema] Erro no servidor JAX: ${response.statusText}`;
+    }
+    
+    const data = await response.json();
+    return data.response;
+  } catch (error: any) {
+    console.error("Erro no chat dinâmico:", error);
+    return `[Sistema] Ocorreu uma anomalia na conexão com o Córtex Python local: ${error?.message}`;
+  }
 }
 
 // SIMULADORES V4 — O CÉREBRO LOCAL RESILIENTE (Kotler + JAX + V4)

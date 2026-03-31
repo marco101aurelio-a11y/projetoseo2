@@ -2,7 +2,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from math_jax import MathIntelligenceJAX
+from agent_squad import AgentSquadOrchestrator
+from typing import List, Dict, Any
+from dotenv import load_dotenv
 import uvicorn
+import os
+
+load_dotenv()
 
 app = FastAPI(title="Capvi Intelligence API - JAX Bridge")
 
@@ -16,6 +22,12 @@ app.add_middleware(
 )
 
 math_engine = MathIntelligenceJAX()
+squad = AgentSquadOrchestrator()
+
+class AgentChatRequest(BaseModel):
+    agent_name: str
+    chat_history: List[Dict[str, Any]]
+    user_input: str
 
 class KeywordAnalysisRequest(BaseModel):
     keyword: str
@@ -99,6 +111,14 @@ async def analyze_dre(request: DreRequest):
         return math_engine.simulate_dre(
             request.investment, request.roas, request.fixed_costs, request.cogs_pct
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/agent/chat")
+async def process_agent_chat(req: AgentChatRequest):
+    try:
+        response = squad.chat_with_agent(req.agent_name, req.chat_history, req.user_input)
+        return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

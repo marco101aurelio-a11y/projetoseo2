@@ -12,8 +12,7 @@ import {
   Link,
   ShoppingCart,
   Store,
-  Box,
-  Package
+  Box
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 

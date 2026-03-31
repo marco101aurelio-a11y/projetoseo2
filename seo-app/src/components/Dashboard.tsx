@@ -47,8 +47,7 @@ export function Dashboard({ seoData, aiInsights }: DashboardProps) {
         const mock: AudienceBehavior = { daysSinceLastVisit: 55, purchasesInLastSemester: 3, averageTicket: 499.00 };
         setLocalInsights(await generateChurnPredictor(mock));
       } else if (profile === 'finance') {
-        const b = await callJax("benchmarks", {});
-        const ticketMedio = b?.avg_monetary || 141.62;
+        await callJax("benchmarks", {});
         const investment = (seoData?.keywordData.search_volume || 1000) * (seoData?.keywordData.cpc || 1) * 0.1;
         const result = await callJax("dre", {
           investment: investment > 0 ? investment : 5000,

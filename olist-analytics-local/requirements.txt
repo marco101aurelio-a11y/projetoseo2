@@ -10,3 +10,4 @@ keras
 fastapi
 uvicorn
 requests
+google-genai
