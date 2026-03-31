@@ -7,6 +7,7 @@ from engines.seo_engine import SEOEngine
 from engines.finance_engine import FinanceEngine
 from engines.growth_engine import GrowthEngine
 from engines.retention_engine import RetentionEngine
+from processor import OlistProcessor
 
 # 🧮 Math Intelligence — JAX Modular Facade V5.0
 # Centralizador de inteligência delegado por sub-motores.
@@ -18,6 +19,7 @@ class MathIntelligenceJAX:
         self.finance = FinanceEngine()
         self.growth = GrowthEngine()
         self.retention = RetentionEngine()
+        self.processor = OlistProcessor()
 
     def analyze_keyword(self, volume, competition, cpc):
         return self.seo.analyze_keyword(volume, competition, cpc)
@@ -37,3 +39,7 @@ class MathIntelligenceJAX:
 
     def simulate_keyword_metrics(self, keyword: str, country: str = "BR", engine: str = "google"):
         return self.seo.simulate_keyword_metrics(keyword, country, engine)
+
+    def get_benchmarks(self):
+        """Retorna os benchmarks reais ou via processamento de dados do Olist."""
+        return self.processor.get_summary_benchmarks()

@@ -71,7 +71,7 @@ export default function App() {
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <Header />
 
-        <main className="flex-1 overflow-y-auto px-6 lg:px-12 py-8 scroll-smooth pb-24">
+        <main className="flex-1 overflow-y-auto custom-scrollbar px-6 lg:px-12 py-8 scroll-smooth pb-24">
           <div className="w-full max-w-[1920px] mx-auto h-full text-white">
             {activeTab === 'seo-resultados' ? (
               <>
