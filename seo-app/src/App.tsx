@@ -12,12 +12,20 @@ import { Bot } from 'lucide-react';
 import { Settings } from './components/Settings';
 import { Projects } from './components/Projects';
 import { InicioDashboard } from './components/InicioDashboard';
+import { MetaAuthCallback } from './components/MetaAuthCallback';
 
 import loginBg from './assets/galactic-bg.jpg';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('inicio');
+
+  // Detecta se estamos na rota de callback do Meta
+  const isMetaCallback = window.location.pathname.startsWith('/auth/meta/callback');
+
+  if (isMetaCallback) {
+    return <MetaAuthCallback />;
+  }
   const [isSearching, setIsSearching] = useState(false);
   const [seoData, setSeoData] = useState<SeoResult | null>(null);
   const [aiInsights, setAiInsights] = useState<AiInsight | null>(null);

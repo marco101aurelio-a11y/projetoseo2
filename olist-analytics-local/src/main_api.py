@@ -3,10 +3,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from math_jax import MathIntelligenceJAX
 from agent_squad import AgentSquadOrchestrator
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
+from datetime import datetime
 import uvicorn
 import os
+import sys
+
+# Adiciona src ao path para imports dos novos módulos
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from services.meta_ads_service import MetaAdsService
+from connectors.meta_to_finance_connector import MetaToFinanceConnector
+from engines.finance_engine import FinanceEngine, TrafficRawData
+from engines.funnel_models import list_funnel_types
+from routes.meta_auth import router as meta_auth_router
 
 load_dotenv()
 
@@ -21,8 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-math_engine = MathIntelligenceJAX()
-squad = AgentSquadOrchestrator()
+math_engine   = MathIntelligenceJAX()
+squad         = AgentSquadOrchestrator()
+meta_service  = MetaAdsService()
+meta_connector= MetaToFinanceConnector()
+
+# Register Routers
+app.include_router(meta_auth_router)
 
 class AgentChatRequest(BaseModel):
     agent_name: str
@@ -55,6 +71,44 @@ class DreRequest(BaseModel):
     roas: float
     fixed_costs: float
     cogs_pct: float = 0.3
+
+# ── Novos modelos para Meta Ads + FinanceEngine v2.0
+class MetaAnalyzeRequest(BaseModel):
+    """
+    Requisição para análise completa: Meta Ads → FinanceEngine.
+    Combina dados da API (ad_account_id) com dados do negócio (cogs_pct, fixed_costs).
+    """
+    ad_account_id: str           # ID da conta Meta (sem 'act_')
+    period: str = "last_30d"    # Período: last_7d, last_30d, last_90d
+    funnel_type: str = "b2c_ecommerce"  # Modelo de funil do negócio
+    cogs_pct: float = 0.30       # % custo do produto
+    fixed_costs: float = 3000.0  # R$ custos fixos mensais
+    tax_rate: Optional[float] = None
+    shipping_rate: Optional[float] = None
+    marketplace_fee: Optional[float] = None
+    use_mock: bool = False       # True para usar dados de demo sem API real
+    access_token: Optional[str] = None # Token real do OAuth
+
+class RawTrafficRequest(BaseModel):
+    """
+    Análise direta via dados manuais — sem API externa.
+    Usuário informa as métricas brutas manualmente no Estúdio.
+    """
+    investment: float
+    clicks: int
+    impressions: int
+    sessions: int
+    orders: int
+    revenue: float
+    cogs_pct: float = 0.30
+    fixed_costs: float = 3000.0
+    funnel_type: str = "b2c_ecommerce"
+    leads: int = 0
+    mqls: int = 0
+    sqls: int = 0
+    tax_rate: Optional[float] = None
+    shipping_rate: Optional[float] = None
+    marketplace_fee: Optional[float] = None
 
 class FinanceRequest(BaseModel):
     revenue: float
@@ -142,6 +196,121 @@ async def process_agent_chat(req: AgentChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ═══════════════════════════════════════════════════════
+# NOVOS ENDPOINTS — Meta Ads + FinanceEngine v2.0
+# Retrocompatíveis — não afetam endpoints anteriores
+# ═══════════════════════════════════════════════════════
+
+@app.get("/meta/campaigns/{ad_account_id}")
+async def get_meta_campaigns(ad_account_id: str, period: str = "last_30d"):
+    """
+    Busca métricas de campanhas do Meta Ads.
+    Se META_ACCESS_TOKEN não estiver configurado, retorna mock.
+    """
+    try:
+        if not meta_service._initialized:
+            return meta_service.get_mock_data(ad_account_id)
+        result = meta_service.get_campaign_metrics(ad_account_id, period)
+        if not result["success"]:
+            raise HTTPException(status_code=400, detail=result["error"])
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/meta/accounts")
+async def get_meta_accounts(access_token: str):
+    """Lista as contas de anúncios do usuário usando um token real."""
+    result = meta_service.get_my_ad_accounts(access_token)
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
+
+@app.post("/finance/analyze/meta")
+async def analyze_meta_to_dre(req: MetaAnalyzeRequest):
+    """
+    Pipeline: Meta Ads -> Normalização -> FinanceEngine.
+    """
+    try:
+        # 1. Busca dados do Meta
+        if req.use_mock:
+            meta_res = meta_service.get_mock_data(req.ad_account_id)
+        else:
+            meta_res = meta_service.get_campaign_metrics(
+                ad_account_id=req.ad_account_id, 
+                date_preset=req.period,
+                access_token=req.access_token
+            )
+
+        if not meta_res["success"]:
+            raise HTTPException(status_code=400, detail=meta_res["error"])
+
+        # 2. Normaliza via conector -> TrafficRawData
+        traffic_data = meta_connector.build_traffic_data(
+            meta_insights=meta_res["data"]["campanhas_raw"],
+            cogs_pct=req.cogs_pct,
+            fixed_costs=req.fixed_costs,
+            funnel_type=req.funnel_type,
+            tax_rate=req.tax_rate,
+            shipping_rate=req.shipping_rate,
+            marketplace_fee=req.marketplace_fee,
+        )
+
+        # 3. Roda FinanceEngine JAX
+        engine = FinanceEngine(funnel_type=traffic_data.funnel_type)
+        result = engine.analyze_from_raw(traffic_data)
+
+        # 4. Enriquece com dados das campanhas individuais
+        result["meta"]["calculado_em"]      = datetime.utcnow().isoformat()
+        result["meta"]["fonte"]              = "meta_ads"
+        result["meta"]["periodo"]            = req.period
+        result["data"]["campanhas_meta"]    = meta_res["data"]["campanhas"]
+        result["data"]["resumo_meta"]       = meta_res["data"]["resumo"]
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/finance/analyze/raw")
+async def analyze_raw_traffic(req: RawTrafficRequest):
+    """
+    Análise via dados manuais — sem API externa.
+    Usuário informa as métricas diretamente no Estúdio.
+    """
+    try:
+        data = TrafficRawData(
+            investment=req.investment, clicks=req.clicks,
+            impressions=req.impressions, sessions=req.sessions,
+            orders=req.orders, revenue=req.revenue,
+            cogs_pct=req.cogs_pct, fixed_costs=req.fixed_costs,
+            funnel_type=req.funnel_type, leads=req.leads,
+            mqls=req.mqls, sqls=req.sqls,
+            tax_rate=req.tax_rate, shipping_rate=req.shipping_rate,
+            marketplace_fee=req.marketplace_fee,
+        )
+        engine = FinanceEngine(funnel_type=req.funnel_type)
+        result = engine.analyze_from_raw(data)
+        result["meta"]["calculado_em"] = datetime.utcnow().isoformat()
+        result["meta"]["fonte"] = "manual"
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/finance/funnel-types")
+def get_funnel_types():
+    """Lista os modelos de funil disponíveis para o onboarding do usuário."""
+    return {"success": True, "data": list_funnel_types(), "error": None, "meta": {}}
+
+
 if __name__ == "__main__":
-    print("🔋 Iniciando Ponte JAX V5.2 — Capvi Intelligence na porta 8000...")
+    print("Iniciando Ponte JAX V5.2 - Capvi Intelligence na porta 8000...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

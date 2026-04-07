@@ -14,7 +14,7 @@ from processor import OlistProcessor
 
 class MathIntelligenceJAX:
     def __init__(self):
-        print("🚀 JAX Math Engine V5.2 — Modular OS Core Inicializado.")
+        print("JAX Math Engine V5.2 - Modular OS Core Inicializado.")
         self.seo = SEOEngine()
         self.finance = FinanceEngine()
         self.growth = GrowthEngine()
