@@ -23,17 +23,18 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
   const [error, setError] = useState<string | null>(null);
 
   const fetchDashboardData = async () => {
-    if (!adAccountId || !accessToken) return;
     setLoading(true);
     setError(null);
     try {
+      const isDemo = adAccountId === 'demo_account' || !accessToken;
+      
       const res = await fetch('http://localhost:8000/finance/analyze/meta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ad_account_id: adAccountId,
-          access_token: accessToken,
-          use_mock: false,
+          ad_account_id: adAccountId || 'demo_account',
+          access_token: accessToken || '',
+          use_mock: isDemo,
           funnel_type: 'b2c_ecommerce'
         })
       });
@@ -83,6 +84,32 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[300px] bg-indigo-500/10 blur-[120px] pointer-events-none" />
 
+      {/* Modo Demo Banner */}
+      {data?.meta?.is_demo && (
+        <div className="bg-blue-600/20 border-b border-blue-500/30 px-6 py-2 flex items-center justify-between z-20">
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 text-blue-400 animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">
+              Modo de Simulação Ativo (JAX Engine)
+            </span>
+          </div>
+          <span className="text-[9px] text-blue-300/60 font-medium">As métricas abaixo são geradas a partir de padrões reais de mercado.</span>
+        </div>
+      )}
+
+      {/* Fallback Banner */}
+      {data?.meta?.fallback_active && (
+        <div className="bg-red-600/20 border-b border-red-500/30 px-6 py-2 flex items-center justify-between z-20">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-red-300">
+              Erro na Conexão Real — Fallback para Simulação
+            </span>
+          </div>
+          <span className="text-[9px] text-red-300/60 font-medium">Verifique seu Token e ID no arquivo .env</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between p-6 md:p-8 border-b border-white/5 z-10 shrink-0">
         <div>
@@ -96,7 +123,11 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
               {diagnostico.health_score} Score • {diagnostico.status_geral}
             </span>
           </div>
-          <p className="text-white/50 text-sm">Conta: <strong>Act_{adAccountId}</strong> • Últimos 30 dias</p>
+          <p className="text-white/50 text-sm">
+            Conta: <strong>{data?.meta?.is_demo ? 'Modo Demonstração' : `Act_${data?.meta?.ad_account_id || adAccountId}`}</strong> 
+            {!data?.meta?.is_demo && <span className="ml-2 px-1.5 py-0.5 bg-blue-500/10 text-blue-400 text-[10px] rounded border border-blue-500/20">Conectada Real</span>}
+            • Histórico Completo
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={onOpenFinance} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-full font-bold text-sm transition-colors shadow-[0_0_20px_rgba(16,185,129,0.2)]">

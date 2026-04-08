@@ -35,7 +35,6 @@ class MetaAdsService:
     INSIGHT_FIELDS = [
         "campaign_name",
         "campaign_id",
-        "status",
         "impressions",
         "reach",
         "clicks",
@@ -57,17 +56,30 @@ class MetaAdsService:
         if not META_SDK_AVAILABLE:
             return
 
+        if access_token == "env_master_token":
+            access_token = None
+
         app_id       = os.getenv("META_APP_ID")
         app_secret   = os.getenv("META_APP_SECRET")
         token        = access_token or os.getenv("META_ACCESS_TOKEN")
 
-        if all([app_id, app_secret, token]):
+        # Limpeza de placeholders
+        if app_id and app_id.startswith("INSERT_"): app_id = None
+        if app_secret and app_secret.startswith("INSERT_"): app_secret = None
+        if token and token.startswith("INSERT_"): token = None
+
+        if token:
             try:
-                FacebookAdsApi.init(
-                    app_id=app_id,
-                    app_secret=app_secret,
-                    access_token=token
-                )
+                # Se não temos app_secret real, passamos apenas o token
+                # Evita enviar appsecret_proof falso (dummy_secret) que o Facebook rejeita.
+                if app_id and app_secret:
+                    FacebookAdsApi.init(
+                        app_id=app_id,
+                        app_secret=app_secret,
+                        access_token=token
+                    )
+                else:
+                    FacebookAdsApi.init(access_token=token)
                 self._initialized = True
             except Exception:
                 self._initialized = False

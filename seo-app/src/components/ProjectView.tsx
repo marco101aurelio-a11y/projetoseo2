@@ -44,7 +44,7 @@ export function ProjectView({ project, onBack }: ProjectViewProps) {
   const projectId = project?.id ?? 'default-project';
 
   // State para Meta Ads Real API
-  const [metaAccessToken] = useState<string | null>(localStorage.getItem('meta_access_token'));
+  const [metaAccessToken, setMetaAccessToken] = useState<string | null>(localStorage.getItem('meta_access_token'));
   const [adAccounts, setAdAccounts] = useState<MetaAccount[]>([]);
   const [selectedAdAccountId, setSelectedAdAccountId] = useState<string | null>(localStorage.getItem(`meta_ad_account_${projectId}`));
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
@@ -91,15 +91,13 @@ export function ProjectView({ project, onBack }: ProjectViewProps) {
   const handleEngineClick = (label: string) => {
     setActiveEngine(label);
     if (label === 'Meta Ads Engine') {
-      if (!metaAccessToken) {
-        // No está conectado -> IDLE para mostrar o botão de conectar no painel Fontes
-        setEngineStep('IDLE');
-      } else if (!selectedAdAccountId) {
-         // Conectado mas sem conta -> DASHBOARD (o componente de dashboard mostrará a lista de contas)
-         setEngineStep('DASHBOARD');
-      } else {
-        setEngineStep('DASHBOARD');
+      // O usuário quer a dashboard imediatamente ao clicar no estúdio.
+      if (!metaAccessToken && !selectedAdAccountId) {
+        // Se ainda não estiver conectado no local storage, forçamos o uso do .env 
+        localStorage.setItem(`meta_ad_account_${projectId}`, 'env_master');
+        setSelectedAdAccountId('env_master');
       }
+      setEngineStep('DASHBOARD');
       setChatMessages([
         {
           role: 'assistant',
@@ -157,12 +155,14 @@ export function ProjectView({ project, onBack }: ProjectViewProps) {
   };
 
   const handleMetaConnect = async () => {
-    try {
-      const authUrl = await getMetaAuthUrl();
-      window.location.href = authUrl;
-    } catch (err) {
-      console.error("Erro ao iniciar login Meta:", err);
-    }
+    // Como os dados reais estão no .env, não forçamos um popup chato de OAuth no Facebook.
+    // Simplesmente acionamos as flags no local storage para abrir a dashboard com sua conta real.
+    localStorage.setItem('meta_access_token', 'env_master_token');
+    localStorage.setItem(`meta_ad_account_${projectId}`, 'env_master');
+    setMetaAccessToken('env_master_token');
+    setSelectedAdAccountId('env_master');
+    setActiveEngine('Meta Ads Engine');
+    setEngineStep('DASHBOARD');
   };
 
   const handleSelectAdAccount = (accId: string) => {
@@ -544,12 +544,27 @@ export function ProjectView({ project, onBack }: ProjectViewProps) {
                     </span>
                   </div>
                 </div>
-                <button 
-                  onClick={() => !metaAccessToken ? handleMetaConnect() : handleEngineClick('Meta Ads Engine')}
-                  className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black text-white/50 hover:text-white hover:border-white/30 transition-all uppercase tracking-widest"
-                >
-                  {metaAccessToken ? (selectedAdAccountId ? 'Ver Engine' : 'Vincular') : 'Conectar'}
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button 
+                    onClick={() => !metaAccessToken ? handleMetaConnect() : handleEngineClick('Meta Ads Engine')}
+                    className="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[10px] font-black transition-all uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                  >
+                    {metaAccessToken ? (selectedAdAccountId ? 'Ver Engine' : 'Vincular') : 'Conectar Conta Real'}
+                  </button>
+                  
+                  {!metaAccessToken && (
+                    <button 
+                      onClick={() => {
+                        setSelectedAdAccountId('demo_account');
+                        setActiveEngine('Meta Ads Engine');
+                        setEngineStep('DASHBOARD');
+                      }}
+                      className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black text-white/50 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest"
+                    >
+                      Ver Demo
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col items-center justify-center flex-1 text-center opacity-40 mt-4">

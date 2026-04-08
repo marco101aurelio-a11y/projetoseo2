@@ -79,7 +79,7 @@ class MetaAnalyzeRequest(BaseModel):
     Combina dados da API (ad_account_id) com dados do negócio (cogs_pct, fixed_costs).
     """
     ad_account_id: str           # ID da conta Meta (sem 'act_')
-    period: str = "last_30d"    # Período: last_7d, last_30d, last_90d
+    period: str = "maximum"    # Período: last_7d, last_30d, last_90d, maximum
     funnel_type: str = "b2c_ecommerce"  # Modelo de funil do negócio
     cogs_pct: float = 0.30       # % custo do produto
     fixed_costs: float = 3000.0  # R$ custos fixos mensais
@@ -223,7 +223,12 @@ async def get_meta_campaigns(ad_account_id: str, period: str = "last_30d"):
 @app.get("/api/meta/accounts")
 async def get_meta_accounts(access_token: str):
     """Lista as contas de anúncios do usuário usando um token real."""
-    result = meta_service.get_my_ad_accounts(access_token)
+    token_to_use = access_token
+    if access_token == "env_master_token":
+        env_token = os.getenv("META_ACCESS_TOKEN")
+        token_to_use = env_token if env_token and not env_token.startswith("INSERT_") else None
+
+    result = meta_service.get_my_ad_accounts(token_to_use)
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["error"])
     return result
@@ -235,14 +240,31 @@ async def analyze_meta_to_dre(req: MetaAnalyzeRequest):
     """
     try:
         # 1. Busca dados do Meta
-        if req.use_mock:
-            meta_res = meta_service.get_mock_data(req.ad_account_id)
+        # Prioriza dados do .env se disponíveis e o frontend não mandou nada específico
+        env_token = os.getenv("META_ACCESS_TOKEN")
+        env_account = os.getenv("META_AD_ACCOUNT_ID")
+        
+        token = req.access_token or (env_token if not env_token.startswith("INSERT_") else None)
+        ad_account = req.ad_account_id
+        
+        if ad_account == "demo_account" and env_account and not env_account.startswith("INSERT_"):
+            ad_account = env_account
+
+        is_demo = ad_account == "demo_account" or not token
+        
+        if req.use_mock or is_demo:
+            meta_res = meta_service.get_mock_data(ad_account)
         else:
             meta_res = meta_service.get_campaign_metrics(
-                ad_account_id=req.ad_account_id, 
+                ad_account_id=ad_account, 
                 date_preset=req.period,
-                access_token=req.access_token
+                access_token=token
             )
+        
+        # Se falhou com os dados reais, tentamos o mock como fallback final
+        if not meta_res["success"] and not is_demo:
+             meta_res = meta_service.get_mock_data("demo_account")
+             meta_res["meta"]["fallback_active"] = True
 
         if not meta_res["success"]:
             raise HTTPException(status_code=400, detail=meta_res["error"])
@@ -266,6 +288,10 @@ async def analyze_meta_to_dre(req: MetaAnalyzeRequest):
         result["meta"]["calculado_em"]      = datetime.utcnow().isoformat()
         result["meta"]["fonte"]              = "meta_ads"
         result["meta"]["periodo"]            = req.period
+        result["meta"]["ad_account_id"]     = ad_account
+        result["meta"]["is_demo"]           = is_demo
+        result["meta"]["fallback_active"]   = meta_res["meta"].get("fallback_active", False)
+        
         result["data"]["campanhas_meta"]    = meta_res["data"]["campanhas"]
         result["data"]["resumo_meta"]       = meta_res["data"]["resumo"]
 
