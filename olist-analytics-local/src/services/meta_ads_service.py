@@ -45,6 +45,7 @@ class MetaAdsService:
         "actions",        # conversões (purchase, lead, add_to_cart...)
         "action_values",  # valores monetários das conversões
         "frequency",
+        "objective",      # objetivo da campanha (TRAFFIC, ENGAGEMENT...)
     ]
 
     def __init__(self, access_token: Optional[str] = None):
@@ -222,12 +223,19 @@ class MetaAdsService:
                     "cpc":           round(cpc, 2),
                     "cpm":           round(cpm, 2),
                     "frequencia":    self._to_float(insight.get("frequency", 0)),
+                    "objetivo_meta": insight.get("objective", "OUTROS"),
                 })
 
+            if campanhas_parsed:
+                print(f"DEBUG: Amostra da 1ª campanha parsed: {campanhas_parsed[0]}")
+
+
             # Resumo agregado da conta
-            cac_geral  = total_spend / (total_orders + 1e-9)
-            roas_geral = total_revenue / (total_spend + 1e-9)
-            ctr_geral  = total_clicks / (total_impressions + 1e-9)
+            cac_geral  = total_spend / total_orders if total_orders > 0 else 0.0
+            roas_geral = total_revenue / total_spend if total_spend > 0 else 0.0
+            ctr_geral  = total_clicks / total_impressions if total_impressions > 0 else 0.0
+            cpc_geral  = total_spend / total_clicks if total_clicks > 0 else 0.0
+            cpm_geral  = (total_spend / total_impressions) * 1000 if total_impressions > 0 else 0.0
 
             return {
                 "success": True,
@@ -244,6 +252,8 @@ class MetaAdsService:
                         "roas_geral":         round(roas_geral, 2),
                         "cac_geral":          round(cac_geral, 2),
                         "ctr_geral":          round(ctr_geral * 100, 2),
+                        "cpc_geral":          round(cpc_geral, 2),
+                        "cpm_geral":          round(cpm_geral, 2),
                         "num_campanhas":      len(campanhas_parsed),
                     }
                 },
@@ -277,6 +287,7 @@ class MetaAdsService:
                 "cpc": "0.58",
                 "ctr": "2.56",
                 "frequency": "1.40",
+                "objective": "OUTCOME_SALES",
                 "actions": [
                     {"action_type": "purchase",    "value": "68"},
                     {"action_type": "add_to_cart", "value": "310"},
@@ -297,6 +308,7 @@ class MetaAdsService:
                 "cpc": "0.43",
                 "ctr": "2.80",
                 "frequency": "2.92",
+                "objective": "OUTCOME_SALES",
                 "actions": [
                     {"action_type": "purchase",    "value": "31"},
                     {"action_type": "add_to_cart", "value": "45"},
@@ -333,6 +345,7 @@ class MetaAdsService:
                 "ctr":         round(self._to_float(c["ctr"]), 2),
                 "cpc":         round(self._to_float(c["cpc"]), 2),
                 "frequencia":  round(self._to_float(c["frequency"]), 2),
+                "objetivo_meta": c.get("objective", "OUTROS"),
             })
 
         return {
@@ -346,9 +359,11 @@ class MetaAdsService:
                     "impressoes_total":   int(total_impressions),
                     "pedidos_total":      int(total_orders),
                     "receita_total":      round(total_revenue, 2),
-                    "roas_geral":         round(total_revenue / (total_spend + 1e-9), 2),
-                    "cac_geral":          round(total_spend / (total_orders + 1e-9), 2),
-                    "ctr_geral":          round(total_clicks / (total_impressions + 1e-9) * 100, 2),
+                    "roas_geral":         round(total_revenue / total_spend if total_spend > 0 else 0, 2),
+                    "cac_geral":          round(total_spend / total_orders if total_orders > 0 else 0, 2),
+                    "ctr_geral":          round(total_clicks / total_impressions * 100 if total_impressions > 0 else 0, 2),
+                    "cpc_geral":          round(total_spend / total_clicks if total_clicks > 0 else 0, 2),
+                    "cpm_geral":          round((total_spend / total_impressions) * 1000 if total_impressions > 0 else 0, 2),
                     "num_campanhas":      len(parsed),
                 }
             },

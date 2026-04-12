@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   TrendingUp, 
   AlertCircle, 
@@ -8,7 +8,9 @@ import {
   ShoppingCart,
   Zap,
   Activity,
-  ArrowRight
+  ArrowRight,
+  Target,
+  Eye
 } from 'lucide-react';
 
 interface MetaAdsDashboardProps {
@@ -17,10 +19,32 @@ interface MetaAdsDashboardProps {
   accessToken: string;
 }
 
+const OBJECTIVE_MAP: Record<string, string> = {
+  'OUTCOME': 'Vendas/Conversão',
+  'OUTCOME_SALES': 'Vendas/Conversão',
+  'CONVERSIONS': 'Conversão',
+  'ENGAGEMENT': 'Engajamento',
+  'OUTCOME_ENGAGEMENT': 'Engajamento',
+  'POST_ENGAGEMENT': 'Engajamento Post',
+  'MESSAGES': 'WhatsApp/Mensagens',
+  'TRAFFIC': 'Tráfego Site',
+  'OUTCOME_TRAFFIC': 'Tráfego Site',
+  'LINK_CLICKS': 'Tráfego (Cliques)',
+  'BRAND_AWARENESS': 'Reconhecimento',
+  'OUTCOME_AWARENESS': 'Reconhecimento',
+  'REACH': 'Alcance',
+  'LEAD_GENERATION': 'Geração de Leads',
+  'OUTCOME_LEADS': 'Geração de Leads',
+  'VIDEO_VIEWS': 'Video Views',
+  'APP_INSTALLS': 'App Installs',
+  'OUTCOME_APP_INSTALLS': 'App Installs'
+};
+
 export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: MetaAdsDashboardProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -52,6 +76,50 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
     fetchDashboardData();
   }, [adAccountId, accessToken]);
 
+  // --- HOOKS & DESTRUCTURING (Must be before any conditional returns) ---
+  const { 
+    metricas_primarias = { roas: 0, cac: 0, ctr: 0 }, 
+    resumo_meta = { roas_geral: 0, cac_geral: 0, investimento_total: 0, receita_total: 0, ctr_geral: 0, cpc_geral: 0, cpm_geral: 0 }, 
+    campanhas_meta = [], 
+    diagnostico = { health_score: 0, status_geral: 'DESCONHECIDO', alertas: [] } 
+  } = data || {};
+  
+  const isHealthy = diagnostico?.status_geral === 'SAUDAVEL';
+  const isCritical = diagnostico?.status_geral === 'CRITICO';
+
+  // Engine de Agrupamento Dinâmico (Híbrido)
+  const getCampCategory = (camp: any) => {
+    if (!camp || !camp.nome) return 'Outros';
+    
+    // 1. Tenta pegar a Tag entre colchetes [Algo] (Pode estar em qualquer lugar do nome)
+    const match = camp.nome.match(/\[(.*?)\]/);
+    if (match) return match[1].trim();
+    
+    // 2. Fallback para o Objetivo Real da API (Com tradução)
+    const apiObjective = camp.objetivo_meta || 'OUTROS';
+    return OBJECTIVE_MAP[apiObjective] || 'Outros';
+  };
+
+  const objectivesCount = useMemo(() => {
+    if (!Array.isArray(campanhas_meta)) return [['Todas', 0]];
+    const counts: Record<string, number> = { 'Todas': campanhas_meta.length };
+    
+    campanhas_meta.forEach((camp: any) => {
+      const category = getCampCategory(camp);
+      counts[category] = (counts[category] || 0) + 1;
+    });
+    
+    return Object.entries(counts).sort((a, b) => a[0] === 'Todas' ? -1 : b[0] === 'Todas' ? 1 : (b[1] as number) - (a[1] as number));
+  }, [campanhas_meta]);
+
+  const filteredCampaigns = useMemo(() => {
+    if (!Array.isArray(campanhas_meta)) return [];
+    if (!selectedObjective || selectedObjective === 'Todas') return campanhas_meta;
+    
+    return campanhas_meta.filter((camp: any) => getCampCategory(camp) === selectedObjective);
+  }, [campanhas_meta, selectedObjective]);
+  // -------------------------------------------------------------------
+
   if (loading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2rem]">
@@ -74,10 +142,6 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
       </div>
     );
   }
-
-  const { metricas_primarias, resumo_meta, campanhas_meta, diagnostico } = data;
-  const isHealthy = diagnostico.status_geral === 'SAUDAVEL';
-  const isCritical = diagnostico.status_geral === 'CRITICO';
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#0a0a0f] border border-white/10 rounded-[2rem] overflow-hidden relative shadow-2xl">
@@ -120,7 +184,7 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
               isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
               'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
             }`}>
-              {diagnostico.health_score} Score • {diagnostico.status_geral}
+              {diagnostico?.health_score || 0} Score • {diagnostico?.status_geral || 'N/A'}
             </span>
           </div>
           <p className="text-white/50 text-sm">
@@ -142,15 +206,15 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
 
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 z-10">
         
-        {/* KPI Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* KPI Row (Negócios) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
-            { label: 'ROAS', value: `${metricas_primarias.roas}x`, icon: TrendingUp, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-            { label: 'CAC Total', value: `R$ ${metricas_primarias.cac.toFixed(2)}`, icon: Activity, color: 'text-pink-400', bg: 'bg-pink-500/10' },
-            { label: 'CTR Médio', value: `${metricas_primarias.ctr}%`, icon: MousePointerClick, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-            { label: 'Receita', value: `R$ ${resumo_meta.receita_total.toLocaleString('pt-BR')}`, icon: ShoppingCart, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+            { label: 'ROAS Global', value: `${resumo_meta?.roas_geral || 0}x`, icon: TrendingUp, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+            { label: 'CAC Total', value: `R$ ${(resumo_meta?.cac_geral || 0).toFixed(2)}`, icon: Activity, color: 'text-pink-400', bg: 'bg-pink-500/10' },
+            { label: 'Gasto Total', value: `R$ ${(resumo_meta?.investimento_total || 0).toLocaleString('pt-BR')}`, icon: DollarSign, color: 'text-red-400', bg: 'bg-red-500/10' },
+            { label: 'Receita', value: `R$ ${(resumo_meta?.receita_total || 0).toLocaleString('pt-BR')}`, icon: ShoppingCart, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
           ].map((kpi, idx) => (
-            <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col hover:bg-white/[0.07] transition-colors">
+            <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col hover:bg-white/[0.07] transition-colors shadow-lg">
               <div className="flex items-center gap-3 mb-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${kpi.bg} ${kpi.color}`}>
                   <kpi.icon className="w-4 h-4" />
@@ -162,8 +226,27 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
           ))}
         </div>
 
+        {/* KPI Row (Tráfego Raiz) */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {[
+            { label: 'CTR Médio (Cliques)', value: `${resumo_meta?.ctr_geral || 0}%`, icon: MousePointerClick, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+            { label: 'CPC Médio (Custo/Clique)', value: `R$ ${Number(resumo_meta?.cpc_geral || 0).toFixed(2)}`, icon: Target, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+            { label: 'CPM Médio (Custo/Mil)', value: `R$ ${Number(resumo_meta?.cpm_geral || 0).toFixed(2)}`, icon: Eye, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+          ].map((kpi, idx) => (
+            <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col hover:bg-white/[0.07] transition-colors">
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center ${kpi.bg} ${kpi.color}`}>
+                  <kpi.icon className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold text-white/50">{kpi.label}</span>
+              </div>
+              <span className="font-display font-black text-xl text-white">{kpi.value}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Diagnóstico Alert */}
-        {diagnostico.alertas && diagnostico.alertas.length > 0 ? (
+        {diagnostico?.alertas && (diagnostico.alertas as any[]).length > 0 ? (
           <div className="mb-8 bg-red-500/10 border border-red-500/30 rounded-2xl p-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
             <div className="flex items-start gap-4">
@@ -171,11 +254,11 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
                  <AlertCircle className="w-5 h-5 text-red-500" />
                </div>
                <div>
-                 <h4 className="font-bold text-red-400 text-lg mb-1">Gargalo Detectado: {diagnostico.alertas[0].camada}</h4>
-                 <p className="text-white/80 text-sm leading-relaxed mb-3">{diagnostico.alertas[0].mensagem}</p>
+                 <h4 className="font-bold text-red-400 text-lg mb-1">Gargalo Detectado: {diagnostico.alertas?.[0]?.camada}</h4>
+                 <p className="text-white/80 text-sm leading-relaxed mb-3">{diagnostico.alertas?.[0]?.mensagem}</p>
                  <div className="flex gap-4 text-xs font-bold">
-                    <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Atual: <span className="text-red-400">{diagnostico.alertas[0].valor}</span></span>
-                    <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Benchmark GT: <span className="text-green-400">{diagnostico.alertas[0].benchmark}</span></span>
+                    <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Atual: <span className="text-red-400">{diagnostico.alertas?.[0]?.valor}</span></span>
+                    <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Benchmark GT: <span className="text-green-400">{diagnostico.alertas?.[0]?.benchmark}</span></span>
                  </div>
                </div>
             </div>
@@ -192,11 +275,28 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
           </div>
         )}
 
+        {/* Flashcards Filter Segmentação de Campanhas */}
+        <div className="mb-6 flex gap-2 overflow-x-auto custom-scrollbar pb-3 pt-1">
+          {objectivesCount.map(([objective, count]) => (
+            <button
+              key={objective}
+              onClick={() => setSelectedObjective(objective)}
+              className={`flex-shrink-0 px-5 py-2.5 rounded-[12px] text-sm font-bold transition-all border ${
+                (selectedObjective === objective) || (!selectedObjective && objective === 'Todas')
+                  ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)] transform scale-105'
+                  : 'bg-white/5 text-white/50 border-white/10 hover:bg-white/10 hover:text-white/80 hover:border-white/20'
+              }`}
+            >
+              {objective === 'Outros' ? 'Sem Tag' : objective} <span className="opacity-50 ml-1">({count})</span>
+            </button>
+          ))}
+        </div>
+
         {/* Campanhas Table */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-white">Overview de Campanhas</h3>
-            <span className="text-xs font-black text-white/40 uppercase tracking-wider">{campanhas_meta.length} ATIVAS</span>
+          <div className="flex items-center justify-between mb-4 px-2">
+            <h3 className="font-bold text-lg text-white">Overview de Campanhas do Objetivo</h3>
+            <span className="text-xs font-black text-white/40 uppercase tracking-wider">{filteredCampaigns.length} FILTRADAS</span>
           </div>
           <div className="w-full overflow-x-auto border border-white/5 rounded-2xl bg-black/20">
             <table className="w-full text-left text-sm whitespace-nowrap">
@@ -211,16 +311,21 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {campanhas_meta.map((camp: any, idx: number) => (
+                {filteredCampaigns.map((camp: any, idx: number) => (
                   <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-6 py-5 font-medium text-white/90">
                       <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${camp.roas > 3 ? 'bg-emerald-400' : camp.roas > 1.5 ? 'bg-yellow-400' : 'bg-red-400'}`} />
-                        {camp.nome}
+                        <div className={`w-2 h-2 rounded-full ${(camp?.roas || 0) > 3 ? 'bg-emerald-400' : (camp?.roas || 0) > 1.5 ? 'bg-yellow-400' : 'bg-red-400'}`} />
+                        <div className="flex flex-col">
+                          <span className="text-white/90">{camp?.nome || 'Sem Nome'}</span>
+                          <span className="text-[10px] text-white/30 uppercase tracking-tighter font-black">
+                            {OBJECTIVE_MAP[camp?.objetivo_meta] || camp?.objetivo_meta || 'Objetivo N/A'}
+                          </span>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5 font-mono text-white/60">{camp.investimento.toFixed(2)}</td>
-                    <td className="px-6 py-5 font-mono text-white/80 font-bold">{camp.receita.toFixed(2)}</td>
+                    <td className="px-6 py-5 font-mono text-white/60">{Number(camp?.investimento || 0).toFixed(2)}</td>
+                    <td className="px-6 py-5 font-mono text-white/80 font-bold">{Number(camp?.receita || 0).toFixed(2)}</td>
                     <td className="px-6 py-5">
                       <span className={`px-2.5 py-1 rounded-md font-black text-xs ${camp.roas > 3 ? 'bg-emerald-500/20 text-emerald-400' : camp.roas > 1.5 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
                         {camp.roas}x
