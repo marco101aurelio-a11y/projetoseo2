@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   TrendingUp, 
   AlertCircle, 
@@ -46,7 +46,7 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
   const [error, setError] = useState<string | null>(null);
   const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -70,15 +70,14 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
     } finally {
       setLoading(false);
     }
-  };
+  }, [adAccountId, accessToken]);
 
   useEffect(() => {
     fetchDashboardData();
-  }, [adAccountId, accessToken]);
+  }, [fetchDashboardData]);
 
   // --- HOOKS & DESTRUCTURING (Must be before any conditional returns) ---
   const { 
-    metricas_primarias = { roas: 0, cac: 0, ctr: 0 }, 
     resumo_meta = { roas_geral: 0, cac_geral: 0, investimento_total: 0, receita_total: 0, ctr_geral: 0, cpc_geral: 0, cpm_geral: 0 }, 
     campanhas_meta = [], 
     diagnostico = { health_score: 0, status_geral: 'DESCONHECIDO', alertas: [] } 

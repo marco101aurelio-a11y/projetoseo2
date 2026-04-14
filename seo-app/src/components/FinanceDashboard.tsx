@@ -5,7 +5,7 @@
  * e a Engenharia Reversa (metas de EBITDA).
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   TrendingUp, 
   DollarSign, 
@@ -31,7 +31,7 @@ export function FinanceDashboard({ projectId }: FinanceDashboardProps) {
   const [error, setError] = useState<string | null>(null);
   const [ebitdaMode, setEbitdaMode] = useState(false);
 
-  const fetchFinancialData = async () => {
+  const fetchFinancialData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -55,11 +55,11 @@ export function FinanceDashboard({ projectId }: FinanceDashboardProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
 
   useEffect(() => {
     fetchFinancialData();
-  }, [projectId]);
+  }, [fetchFinancialData]);
 
   if (loading) {
     return (

@@ -24,7 +24,7 @@ import { BusinessOnboarding } from './BusinessOnboarding';
 import { FinanceDashboard } from './FinanceDashboard';
 import { hasBusinessData, type BusinessData } from '../services/financeService';
 import { projectService } from '../services/projectService';
-import { getMetaAuthUrl, getMetaAccounts, type MetaAccount } from '../services/metaService';
+import { getMetaAccounts, type MetaAccount } from '../services/metaService';
 
 interface ProjectViewProps {
   project: any;

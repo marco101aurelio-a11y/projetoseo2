@@ -47,7 +47,7 @@ def refinar_dados_olist(path_items, path_products, path_customers):
     
     try:
         # Carregamento
-        df_items = pd.read_csv(path_items)
+        df_items = pd.read_csv(path_items)xande 
         df_products = pd.read_csv(path_products)
         df_customers = pd.read_csv(path_customers)
         

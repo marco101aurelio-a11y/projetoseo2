@@ -19,13 +19,6 @@ import loginBg from './assets/galactic-bg.jpg';
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('inicio');
-
-  // Detecta se estamos na rota de callback do Meta
-  const isMetaCallback = window.location.pathname.startsWith('/auth/meta/callback');
-
-  if (isMetaCallback) {
-    return <MetaAuthCallback />;
-  }
   const [isSearching, setIsSearching] = useState(false);
   const [seoData, setSeoData] = useState<SeoResult | null>(null);
   const [aiInsights, setAiInsights] = useState<AiInsight | null>(null);
@@ -37,6 +30,14 @@ export default function App() {
     { id: 2, title: 'Estratégia SEO Black Friday', date: '22 de out. de 2024', sources: 8 },
     { id: 3, title: 'Auditoria Técnica Blog', date: '5 de set. de 2024', sources: 4 },
   ]);
+
+  // Detecta se estamos na rota de callback do Meta
+  const isMetaCallback = window.location.pathname.startsWith('/auth/meta/callback');
+
+  if (isMetaCallback) {
+    return <MetaAuthCallback />;
+  }
+
 
   const handleSearch = async (query: string) => {
     setIsSearching(true);
