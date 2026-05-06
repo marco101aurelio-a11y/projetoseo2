@@ -3,37 +3,67 @@ import type { Project } from '../types';
 const STORAGE_KEY = 'capvi_seo_projects';
 
 export const projectService = {
+  // Returns only NON-archived projects
   getProjects: (): Project[] => {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    const all: Project[] = data ? JSON.parse(data) : [];
+    return all.filter(p => !p.archived);
+  },
+
+  // Returns only archived projects
+  getArchivedProjects: (): Project[] => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    const all: Project[] = data ? JSON.parse(data) : [];
+    return all.filter(p => p.archived === true);
   },
 
   saveProject: (project: Omit<Project, 'id' | 'createdAt'> & { id?: string }): Project => {
-    const projects = projectService.getProjects();
-    const isNew = !project.id;
-    
+    const data = localStorage.getItem(STORAGE_KEY);
+    const projects: Project[] = data ? JSON.parse(data) : [];
+
     const newProject: Project = {
       ...project,
       id: project.id || crypto.randomUUID(),
-      createdAt: isNew ? new Date().toISOString() : (projects.find(p => p.id === project.id)?.createdAt || new Date().toISOString()),
-      keywords: project.keywords || []
+      createdAt: (project as any).createdAt || new Date().toISOString(),
+      keywords: project.keywords || [],
+      labelIds: project.labelIds || []
     } as Project;
 
-    if (isNew) {
-      projects.push(newProject);
+    const index = projects.findIndex(p => String(p.id) === String(newProject.id));
+
+    if (index !== -1) {
+      projects[index] = newProject;
     } else {
-      const index = projects.findIndex(p => p.id === project.id);
-      if (index !== -1) {
-        projects[index] = newProject;
-      }
+      projects.unshift(newProject);
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
     return newProject;
   },
 
+  archiveProject: (id: string): void => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    const projects: Project[] = data ? JSON.parse(data) : [];
+    const index = projects.findIndex(p => String(p.id) === String(id));
+    if (index !== -1) {
+      projects[index] = { ...projects[index], archived: true };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    }
+  },
+
+  unarchiveProject: (id: string): void => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    const projects: Project[] = data ? JSON.parse(data) : [];
+    const index = projects.findIndex(p => String(p.id) === String(id));
+    if (index !== -1) {
+      projects[index] = { ...projects[index], archived: false };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    }
+  },
+
   deleteProject: (id: string): void => {
-    const projects = projectService.getProjects();
+    const data = localStorage.getItem(STORAGE_KEY);
+    const projects: Project[] = data ? JSON.parse(data) : [];
     const filtered = projects.filter(p => p.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   }

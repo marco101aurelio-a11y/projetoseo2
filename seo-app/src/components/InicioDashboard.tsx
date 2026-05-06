@@ -44,6 +44,9 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [benchmarks, setBenchmarks] = useState<any>(null);
 
+  // Global Notes state
+  const [globalNotes, setGlobalNotes] = useState<string[]>([]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCarouselIndex((prev) => (prev + 1) % carouselTexts.length);
@@ -54,6 +57,21 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
       setBenchmarks(data);
     };
     loadBenchmarks();
+
+    // Load Notes
+    const savedNotes = JSON.parse(localStorage.getItem('capvi_notes') || '[]');
+    if (savedNotes.length > 0) {
+      setGlobalNotes(savedNotes);
+    } else {
+      setGlobalNotes([
+        "Revisar backlinks do Projeto SEO",
+        "Ajustar meta tags da Home",
+        "Analisar concorrente Alpha",
+        "Planejar posts de Abril",
+        "Validar conversão do Checkout",
+        "Otimizar cache do JAX"
+      ]);
+    }
 
     return () => clearInterval(interval);
   }, []);
@@ -90,10 +108,10 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
         {/* Bloco Overview removido conforme solicitado */}
         
         {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           
           {/* SERP Overview (Manted Cover) - 2 cols wide, 1 tall */}
-          <div className="lg:col-span-2 xl:col-span-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] overflow-hidden relative min-h-[280px] group shadow-2xl">
+          <div className="lg:col-span-2 xl:col-span-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2rem] overflow-hidden relative min-h-[240px] sm:min-h-[280px] group shadow-2xl">
              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 via-purple-500/20 to-transparent z-10 pointer-events-none mix-blend-overlay" />
              <img 
                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1600&q=80" 
@@ -101,39 +119,39 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
              />
              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/90 via-[#0a0a0a]/30 to-transparent z-10" />
-             <div className="absolute bottom-8 left-8 z-20">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50 mb-2 block">DADOS REAIS</span>
-                <h2 className="text-4xl font-display font-black text-white italic">Olist Intelligence</h2>
-                <div className="flex gap-6 mt-4">
+             <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-20">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-white/50 mb-2 block">DADOS REAIS</span>
+                <h2 className="text-3xl sm:text-4xl font-display font-black text-white italic">Olist Intelligence</h2>
+                <div className="flex flex-wrap gap-4 sm:gap-6 mt-3 sm:mt-4">
                    <div className="flex flex-col">
-                      <span className="text-2xl font-black text-indigo-400">{benchmarks?.total_customers?.toLocaleString() || "..."}</span>
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-white/30">Clientes</span>
+                      <span className="text-xl sm:text-2xl font-black text-indigo-400">{benchmarks?.total_customers?.toLocaleString() || "..."}</span>
+                      <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30">Clientes</span>
                    </div>
-                   <div className="flex flex-col border-l border-white/10 pl-6">
-                      <span className="text-2xl font-black text-purple-400">R$ {benchmarks?.avg_monetary?.toFixed(2) || "..."}</span>
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-white/30">Ticket Médio</span>
+                   <div className="flex flex-col border-l border-white/10 pl-4 sm:pl-6">
+                      <span className="text-xl sm:text-2xl font-black text-purple-400">R$ {benchmarks?.avg_monetary?.toFixed(2) || "..."}</span>
+                      <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30">Ticket Médio</span>
                    </div>
-                   <div className="flex flex-col border-l border-white/10 pl-6">
-                      <span className="text-2xl font-black text-green-400">{benchmarks?.avg_frequency?.toFixed(2) || "..."}x</span>
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-white/30">Frequência</span>
+                   <div className="flex flex-col border-l border-white/10 pl-4 sm:pl-6">
+                      <span className="text-xl sm:text-2xl font-black text-green-400">{benchmarks?.avg_frequency?.toFixed(2) || "..."}x</span>
+                      <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30">Frequência</span>
                    </div>
                 </div>
              </div>
           </div>
 
           {/* Automação Carousel - 1 col wide, 1 tall */}
-          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-[rgba(255,255,255,0.15)] rounded-[2rem] p-8 flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl min-h-[280px]">
+          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-[rgba(255,255,255,0.15)] rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl min-h-[240px] sm:min-h-[280px]">
             <div className="absolute -inset-24 bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity" />
-            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-6 z-10 transition-transform group-hover:scale-110 duration-500">
-               <Bot className="w-8 h-8 text-white" />
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/10 flex items-center justify-center mb-6 z-10 transition-transform group-hover:scale-110 duration-500">
+               <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             {/* Título Inteligência Ativa removido conforme solicitado */}
-            <div className="h-10 relative w-full flex items-center justify-center z-10">
+            <div className="h-8 sm:h-10 relative w-full flex items-center justify-center z-10">
               {carouselTexts.map((text, idx) => (
                 <span 
                   key={idx} 
                   className={cn(
-                    "absolute transition-all duration-500 font-display font-black text-2xl text-center whitespace-nowrap",
+                    "absolute transition-all duration-500 font-display font-black text-xl sm:text-2xl text-center whitespace-nowrap",
                     idx === carouselIndex ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                   )}
                 >
@@ -144,217 +162,44 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
           </div>
 
           {/* Notas Adicionadas - 1 col wide, 1 tall+ */}
-          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 flex flex-col shadow-2xl group transition-all min-h-[340px]">
-             <div className="flex justify-between items-start mb-6">
-                <h3 className="font-display font-black text-xl uppercase tracking-tighter">Notas</h3>
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                  <PenTool className="w-5 h-5 text-white/60" />
+          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 flex flex-col shadow-2xl group transition-all min-h-[280px] sm:min-h-[340px]">
+             <div className="flex justify-between items-start mb-4 sm:mb-6">
+                <h3 className="font-display font-black text-lg sm:text-xl uppercase tracking-tighter">Notas</h3>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                  <PenTool className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
                 </div>
              </div>
-             <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-2 no-scrollbar">
-                {[
-                  "Revisar backlinks do Projeto SEO",
-                  "Ajustar meta tags da Home",
-                  "Analisar concorrente Alpha",
-                  "Planejar posts de Abril",
-                  "Validar conversão do Checkout",
-                  "Otimizar cache do JAX"
-                ].map((note, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-[11px] font-bold text-white/70 hover:text-white transition-colors cursor-default">
+             <div className="flex-1 flex flex-col gap-2 sm:gap-3 overflow-y-auto pr-2 custom-scrollbar">
+                {globalNotes.length === 0 && (
+                  <p className="text-white/30 text-xs italic">Nenhuma nota salva</p>
+                )}
+                {globalNotes.map((note, idx) => (
+                  <div key={idx} className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/5 border border-white/5 text-[10px] sm:text-[11px] font-bold text-white/70 hover:text-white transition-colors cursor-default whitespace-pre-wrap">
                     {note}
                   </div>
                 ))}
              </div>
           </div>
 
-          {/* Diagnóstico Início - 2 cols wide */}
-          <div className="lg:col-span-2 xl:col-span-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 flex flex-col shadow-2xl min-h-[320px] relative overflow-hidden">
-             <div className="flex items-center justify-between mb-6 z-10">
-                <h3 className="font-display font-black text-xl">Diagnóstico Início</h3>
-                {diagnosisStep > 0 && (
-                  <button onClick={() => setDiagnosisStep(0)} className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors flex items-center gap-2">
-                    <X className="w-3 h-3" /> Reiniciar
-                  </button>
-                )}
-             </div>
-
-             <div className="flex-1 flex flex-col z-10">
-                {diagnosisStep === 0 && (
-                  <div className="flex flex-col items-center justify-center h-full text-center gap-6 animate-in fade-in zoom-in duration-500">
-                    <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                      <ClipboardList className="w-10 h-10 text-indigo-400" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg mb-2">Melhore seu contexto estratégico</h4>
-                      <p className="text-sm text-white/50 max-w-sm mx-auto">Responda algumas perguntas rápidas para que a Capvi IA possa otimizar sua estratégia.</p>
-                    </div>
-                    <button 
-                      onClick={() => setDiagnosisStep(1)}
-                      className="px-8 py-3 bg-white text-black rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform active:scale-95"
-                    >
-                      Começar Diagnóstico
-                    </button>
-                  </div>
-                )}
-
-                {diagnosisStep === 1 && (
-                  <div className="flex flex-col gap-6 animate-in slide-in-from-right-8 duration-500 h-full">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-2 text-left">
-                        <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-2">Qual seu setor / nicho?</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ex: E-commerce de Moda" 
-                          className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-white/20 transition-colors"
-                          value={diagnosisData.sector}
-                          onChange={(e) => setDiagnosisData({...diagnosisData, sector: e.target.value})}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2 text-left">
-                        <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-2">Qual momento da empresa?</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ex: Escala operacional" 
-                          className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-white/20 transition-colors"
-                          value={diagnosisData.moment}
-                          onChange={(e) => setDiagnosisData({...diagnosisData, moment: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2 text-left">
-                      <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-2">Qual a sua oferta principal?</label>
-                      <textarea 
-                        placeholder="Descreva seu produto ou serviço estrela..." 
-                        className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-white/20 transition-colors resize-none h-24"
-                        value={diagnosisData.offer}
-                        onChange={(e) => setDiagnosisData({...diagnosisData, offer: e.target.value})}
-                      />
-                    </div>
-                    <div className="mt-auto flex justify-end">
-                      <button onClick={() => setDiagnosisStep(2)} className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white text-white hover:text-black rounded-full transition-all group">
-                        <span className="text-[10px] uppercase font-black">Próximo</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {diagnosisStep === 2 && (
-                  <div className="flex flex-col gap-6 animate-in slide-in-from-right-8 duration-500 h-full">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-2 text-left">
-                        <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-2">Margem de contribuição / Lucro líquido?</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ex: 30% / R$ 50k" 
-                          className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-white/20 transition-colors"
-                          value={diagnosisData.margin}
-                          onChange={(e) => setDiagnosisData({...diagnosisData, margin: e.target.value})}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2 text-left">
-                        <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-2">Principal objetivo com a plataforma?</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ex: Aumentar tráfego orgânico" 
-                          className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-white/20 transition-colors"
-                          value={diagnosisData.objective}
-                          onChange={(e) => setDiagnosisData({...diagnosisData, objective: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="mt-auto flex justify-between">
-                      <button onClick={() => setDiagnosisStep(1)} className="flex items-center gap-2 px-6 py-3 text-white/40 hover:text-white rounded-full transition-all group">
-                         <span className="text-[10px] uppercase font-black">Voltar</span>
-                      </button>
-                      <button onClick={() => setDiagnosisStep(3)} className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white text-white hover:text-black rounded-full transition-all group">
-                        <span className="text-[10px] uppercase font-black">Próximo</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {diagnosisStep === 3 && (
-                  <div className="flex flex-col gap-6 animate-in slide-in-from-right-8 duration-500 h-full">
-                    <div className="flex flex-col gap-2 text-left">
-                      <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-2">Histórico de estratégia + processo de venda?</label>
-                      <textarea 
-                        placeholder="Como você vende hoje?" 
-                        className="bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-white/20 transition-colors resize-none h-20"
-                        value={diagnosisData.history}
-                        onChange={(e) => setDiagnosisData({...diagnosisData, history: e.target.value})}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2 text-left">
-                      <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-2">Canais já utilizados:</label>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {[
-                          "Facebook Ads", "Instagram", "Google Search", 
-                          "Google Display", "Website / SEO", "Landing Pages", 
-                          "Mídia Nativa", "Mídia de Nicho", "Nenhum"
-                        ].map(channel => (
-                          <button 
-                            key={channel}
-                            onClick={() => handleChannelToggle(channel)}
-                            className={cn(
-                              "text-[9px] uppercase font-black py-2 px-3 rounded-lg border transition-all text-center",
-                              diagnosisData.channels.includes(channel) 
-                                ? "bg-white text-black border-white" 
-                                : "bg-white/5 text-white/40 border-white/5 hover:border-white/20"
-                            )}
-                          >
-                            {channel}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mt-auto flex justify-between">
-                      <button onClick={() => setDiagnosisStep(2)} className="flex items-center gap-2 px-6 py-3 text-white/40 hover:text-white rounded-full transition-all group">
-                         <span className="text-[10px] uppercase font-black">Voltar</span>
-                      </button>
-                      <button 
-                        onClick={() => {
-                          alert("Diagnóstico salvo com sucesso!");
-                          setDiagnosisStep(0);
-                        }} 
-                        className="flex items-center gap-2 px-8 py-3 bg-indigo-500 hover:bg-indigo-400 text-white rounded-full transition-all group shadow-lg shadow-indigo-500/20"
-                      >
-                        <Check className="w-4 h-4" />
-                        <span className="text-[10px] uppercase font-black">Finalizar</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-             </div>
-             
-             {/* Indicador de Progresso */}
-             {diagnosisStep > 0 && (
-               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1 items-center">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className={cn("h-1 rounded-full transition-all duration-500", i === diagnosisStep ? "w-8 bg-white" : "w-2 bg-white/20")} />
-                  ))}
-               </div>
-             )}
-          </div>
+          {/* O Fluxo de Diagnóstico Início foi migrado para o App.tsx (Modal de primeiro acesso) */}
 
           {/* Saúde dos Projetos (Project Health) */}
-          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden group">
-             <div className="absolute top-6 left-1/2 -translate-x-1/2 w-full px-8 flex justify-between items-center z-10">
-                <h3 className="font-black text-[10px] uppercase tracking-widest text-white/50">Saúde dos Projetos</h3>
+          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden group">
+             <div className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 w-full px-6 sm:px-8 flex justify-between items-center z-10">
+                <h3 className="font-black text-[9px] sm:text-[10px] uppercase tracking-widest text-white/50">Saúde dos Projetos</h3>
              </div>
              
              {/* Circular SVG Graph */}
-             <div className="relative mt-8 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                <svg className="w-32 h-32 transform -rotate-90">
-                  <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-white/5" />
+             <div className="relative mt-6 sm:mt-8 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                <svg className="w-28 h-28 sm:w-32 sm:h-32 transform -rotate-90">
+                  <circle cx="50%" cy="50%" r="40%" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
                   <circle 
-                    cx="64" cy="64" r="56" 
+                    cx="50%" cy="50%" r="40%" 
                     stroke="url(#healthGradient)" 
-                    strokeWidth="10" 
+                    strokeWidth="8" 
                     fill="transparent" 
-                    strokeDasharray="351.85" 
-                    strokeDashoffset={351.85 - (351.85 * mockHealthScore) / 100} 
+                    strokeDasharray="251.2" 
+                    strokeDashoffset={251.2 - (251.2 * mockHealthScore) / 100} 
                     strokeLinecap="round"
                     className="drop-shadow-[0_0_12px_rgba(34,197,94,0.3)] transition-all duration-1000" 
                   />
@@ -366,18 +211,18 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
                   </defs>
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <span className="text-4xl font-display font-black text-white">{mockHealthScore}</span>
-                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider -mt-1">%</span>
+                  <span className="text-3xl sm:text-4xl font-display font-black text-white">{mockHealthScore}</span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-indigo-400 uppercase tracking-wider -mt-1">%</span>
                 </div>
              </div>
              
-             <div className="mt-6 flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-500" key={projectIndex}>
-                <span className="text-xs font-black text-white mb-1 uppercase tracking-tighter">{currentProject.title}</span>
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Estado Técnico Nominal</p>
+             <div className="mt-4 sm:mt-6 flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-500" key={projectIndex}>
+                <span className="text-[11px] sm:text-xs font-black text-white mb-1 uppercase tracking-tighter">{currentProject.title}</span>
+                <p className="text-[9px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest">Estado Técnico Nominal</p>
              </div>
 
              {/* Indicador de Rotação */}
-             <div className="absolute bottom-6 flex gap-1">
+             <div className="absolute bottom-4 sm:bottom-6 flex gap-1">
                 {projects.length > 0 ? projects.map((_, i) => (
                   <div key={i} className={cn("w-1 h-1 rounded-full transition-all", i === projectIndex ? "bg-white w-4" : "bg-white/20")} />
                 )) : <div className="w-4 h-1 rounded-full bg-white/20" />}
@@ -385,9 +230,9 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
           </div>
 
           {/* Quick Actions */}
-          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 flex flex-col shadow-2xl">
-             <h3 className="font-display font-black text-xl mb-6">Ações Rápidas</h3>
-             <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 flex flex-col shadow-2xl">
+             <h3 className="font-display font-black text-lg sm:text-xl mb-4 sm:mb-6">Ações Rápidas</h3>
+             <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {[
                   { label: "Criar novo", icon: Play },
                   { label: "Analisar SEO", icon: Activity },
@@ -400,10 +245,10 @@ export function InicioDashboard({ projects, setActiveTab }: InicioDashboardProps
                       if (action.label === 'Criar novo') setActiveTab('projetos');
                       if (action.label === 'Capvi Drop') setShowCapviDrop(true);
                     }} 
-                    className="flex flex-col items-center justify-center gap-3 p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group hover:-translate-y-1"
+                    className="flex flex-col items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl sm:rounded-2xl transition-all group hover:-translate-y-1"
                    >
-                     <action.icon className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
-                     <span className="text-[10px] uppercase tracking-wider font-bold text-white/60 group-hover:text-white/90 transition-colors text-center">{action.label}</span>
+                     <action.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white/70 group-hover:text-white transition-colors" />
+                     <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold text-white/60 group-hover:text-white/90 transition-colors text-center">{action.label}</span>
                   </button>
                 ))}
              </div>

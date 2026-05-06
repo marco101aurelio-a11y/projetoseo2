@@ -1,23 +1,30 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
+from dotenv import load_dotenv
+from supabase import create_client, Client
 
-# Define o caminho do banco SQLite na pasta storage (criada anteriormente)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "storage", "capvi_intelligence.db")
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+load_dotenv()
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Configuração Supabase
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-Base = declarative_base()
+# Singleton do Cliente Supabase
+_supabase: Client = None
 
+def get_supabase() -> Client:
+    global _supabase
+    if _supabase is None:
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            # Fallback para evitar crash imediato se as chaves não estiverem no env
+            print("⚠️ Aviso: SUPABASE_URL ou SUPABASE_KEY não configurados.")
+        else:
+            _supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    return _supabase
+
+# Mock de get_db para manter compatibilidade com FastAPI Depends
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    """
+    Retorna o cliente Supabase. 
+    Mantido o nome get_db para evitar quebra em main_api.py.
+    """
+    return get_supabase()

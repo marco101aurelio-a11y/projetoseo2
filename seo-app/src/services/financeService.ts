@@ -7,10 +7,16 @@
  *   - Resultado do DRE → estado React — NÃO é persistido (recalcular é instantâneo)
  */
 
+import { supabase } from '../lib/supabase';
 import type { EngineResult } from './metaService';
 
 const API_BASE = 'http://localhost:8000';
 const STORAGE_KEY = 'capvi_business_data';
+
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session ? { 'Authorization': `Bearer ${session.access_token}` } : {};
+}
 
 // ─── Tipos ───────────────────────────────────────────────
 
@@ -99,7 +105,10 @@ export function hasBusinessData(projectId: string): boolean {
 export async function analyzeRawTraffic(req: RawTrafficRequest): Promise<EngineResult> {
   const res = await fetch(`${API_BASE}/finance/analyze/raw`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(await getAuthHeader())
+    },
     body: JSON.stringify(req),
   });
   if (!res.ok) throw new Error(`Finance API error: ${res.status}`);

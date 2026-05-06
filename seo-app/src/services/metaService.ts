@@ -1,10 +1,11 @@
-/**
- * metaService.ts — Serviço de acesso ao Meta Ads Engine (backend Capvi)
- * Responsabilidade: chamar os endpoints /meta/* e /finance/analyze/meta
- * NÃO calcula nada — apenas busca e normaliza para o frontend
- */
+import { supabase } from '../lib/supabase';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = '/api';
+
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session ? { 'Authorization': `Bearer ${session.access_token}` } : {};
+}
 
 // ─── Tipos ───────────────────────────────────────────────
 
@@ -146,7 +147,10 @@ export interface EngineResult {
 export async function analyzeMetaAds(req: MetaAnalyzeRequest): Promise<EngineResult> {
   const res = await fetch(`${API_BASE}/finance/analyze/meta`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(await getAuthHeader())
+    },
     body: JSON.stringify({
       ad_account_id: req.ad_account_id,
       period: req.period ?? 'last_30d',
@@ -168,7 +172,9 @@ export async function analyzeMetaAds(req: MetaAnalyzeRequest): Promise<EngineRes
  * Busca a URL de autorização do Meta no backend
  */
 export async function getMetaAuthUrl(): Promise<string> {
-  const res = await fetch(`${API_BASE}/api/auth/meta/url`);
+  const res = await fetch(`${API_BASE}/api/auth/meta/url`, {
+    headers: await getAuthHeader()
+  });
   if (!res.ok) throw new Error('Erro ao buscar URL de autenticação');
   const data = await res.json();
   return data.url;
@@ -178,7 +184,9 @@ export async function getMetaAuthUrl(): Promise<string> {
  * Troca o code do Meta por um token persistente
  */
 export async function exchangeMetaCode(code: string): Promise<{ access_token: string }> {
-  const res = await fetch(`${API_BASE}/api/auth/meta/callback?code=${code}`);
+  const res = await fetch(`${API_BASE}/api/auth/meta/callback?code=${code}`, {
+    headers: await getAuthHeader()
+  });
   if (!res.ok) throw new Error('Erro ao trocar code por token');
   return res.json();
 }
@@ -187,7 +195,9 @@ export async function exchangeMetaCode(code: string): Promise<{ access_token: st
  * Lista as contas de anúncios disponíveis para o token informado
  */
 export async function getMetaAccounts(accessToken: string): Promise<MetaAccount[]> {
-  const res = await fetch(`${API_BASE}/api/meta/accounts?access_token=${accessToken}`);
+  const res = await fetch(`${API_BASE}/api/meta/accounts?access_token=${accessToken}`, {
+    headers: await getAuthHeader()
+  });
   if (!res.ok) throw new Error('Erro ao buscar contas de anúncios');
   const json = await res.json();
   return json.data;
@@ -203,7 +213,8 @@ export async function getMetaCampaigns(
   period = 'last_30d'
 ): Promise<{ campanhas: MetaCampanha[]; resumo: MetaResumo }> {
   const res = await fetch(
-    `${API_BASE}/meta/campaigns/${adAccountId}?period=${period}`
+    `${API_BASE}/meta/campaigns/${adAccountId}?period=${period}`,
+    { headers: await getAuthHeader() }
   );
   if (!res.ok) throw new Error(`Erro ao buscar campanhas: ${res.status}`);
   const json = await res.json();
@@ -215,7 +226,9 @@ export async function getMetaCampaigns(
  * Retorna: [{ value, label }, ...]
  */
 export async function getFunnelTypes(): Promise<{ value: string; label: string }[]> {
-  const res = await fetch(`${API_BASE}/finance/funnel-types`);
+  const res = await fetch(`${API_BASE}/finance/funnel-types`, {
+    headers: await getAuthHeader()
+  });
   if (!res.ok) throw new Error('Erro ao buscar modelos de funil');
   const json = await res.json();
   return json.data;

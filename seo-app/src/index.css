@@ -43,36 +43,42 @@
 }
 
 @layer components {
+  /* GLASMORPHISM PREMIUM COMPONENTS */
   .glass-card {
-    @apply bg-white/5 backdrop-blur-[48px] rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-white/20;
+    @apply bg-white/5 backdrop-blur-[32px] rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] border border-white/10 transition-all duration-500 hover:bg-white/10 hover:border-white/20;
   }
 
   .glass-panel {
     @apply bg-black/40 backdrop-blur-[24px] rounded-[2rem] border border-white/5;
   }
 
-  .tonal-lift {
-    @apply bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300;
+  .glass-button {
+    @apply flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white rounded-full transition-all hover:bg-white/15 active:scale-95;
   }
 
   .premium-input {
-    @apply w-full px-8 py-5 rounded-full bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/40 transition-all backdrop-blur-md text-lg shadow-inner;
+    @apply w-full px-6 py-4 rounded-full bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/40 transition-all backdrop-blur-md text-[15px];
   }
 
   .premium-button {
-    @apply inline-flex items-center justify-center gap-2 bg-white text-black font-bold px-8 py-4 rounded-full transition-all active:scale-95 hover:bg-white/90 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 bg-white text-black font-bold px-8 py-4 rounded-full transition-all active:scale-95 hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .display-lg {
     @apply font-display text-[4rem] leading-[1.05] tracking-tight font-extrabold;
   }
   
+  .tonal-lift {
+    @apply bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,0,0,0.2)] transition-all duration-300;
+  }
+
+  /* GALACTIC GLOWS */
   .galactic-glow-blue {
     @apply absolute w-[600px] h-[600px] bg-blue-500/20 blur-[120px] rounded-full pointer-events-none;
   }
   
   .galactic-glow-orange {
-    @apply absolute w-[500px] h-[500px] bg-orange-500/10 blur-[100px] rounded-full pointer-events-none;
+    @apply absolute w-[500px] h-[500px] bg-purple-500/15 blur-[100px] rounded-full pointer-events-none;
   }
   
   .galactic-glow-teal {
@@ -80,34 +86,17 @@
   }
 }
 
+/* ANIMATIONS */
 @keyframes walk-horizontal {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes waddle {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(-1deg);
-  }
-
-  25% {
-    transform: translateY(-6px) rotate(1deg);
-  }
-
-  50% {
-    transform: translateY(0) rotate(-1deg);
-  }
-
-  75% {
-    transform: translateY(-6px) rotate(1deg);
-  }
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  25% { transform: translateY(-6px) rotate(1deg); }
+  50% { transform: translateY(0) rotate(-1deg); }
+  75% { transform: translateY(-6px) rotate(1deg); }
 }
 
 .animate-walk {
@@ -118,7 +107,7 @@
   animation: waddle 0.5s ease-in-out infinite;
 }
 
-/* 1.1 Barra de rolagem dark / Stealth Scrollbars */
+/* STEALTH SCROLLBARS */
 *::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -129,37 +118,33 @@
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.05); /* Quase invisível */
+  background-color: rgba(255, 255, 255, 0.05);
   border-radius: 20px;
   transition: background-color 0.3s ease;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.15); /* Sutil ao hover */
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Remover botões/setas no Windows */
 *::-webkit-scrollbar-button {
   display: none;
 }
 
-/* Firefox support - Stealth */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
 }
 
-/* Classe utilitária para Ocultação Total (Preservando Funcionalidade) */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
 .no-scrollbar {
-  -ms-overflow-style: none; /* IE e Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
 }
 
-/* Custom Scrollbar Premium (hover mais visível para elementos scrolláveis interativos) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }

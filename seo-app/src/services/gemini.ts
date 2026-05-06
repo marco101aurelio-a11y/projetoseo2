@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import type { SeoResult, AiInsight, AdStats, CampaignData, AudienceBehavior, FinanceResult } from '../types';
+import { supabase } from '../lib/supabase';
 
 /**
  * 🧠 CAPVI IA V5.1 — O CÉREBRO REGENERATIVO & GROWTH
@@ -11,11 +12,19 @@ Seu Método: Unir a profundidade de Kotler (Marketing Holístico) com a agressiv
 Sua Voz: Didática, Inspiradora, Consciente e Resolutiva. Você gera "Aha! Moments".
 `;
 
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session ? { 'Authorization': `Bearer ${session.access_token}` } : {};
+}
+
 export async function callJax(endpoint: string, body: any): Promise<any | null> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/analyze/${endpoint}`, {
+    const response = await fetch(`/api/analyze/${endpoint}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(await getAuthHeader())
+      },
       body: JSON.stringify(body)
     });
     
@@ -29,7 +38,9 @@ export async function callJax(endpoint: string, body: any): Promise<any | null> 
 
 export async function getBenchmarks(): Promise<any | null> {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/analyze/benchmarks`);
+    const response = await fetch(`/api/analyze/benchmarks`, {
+      headers: { ...(await getAuthHeader()) }
+    });
     if (!response.ok) return null;
     return await response.json();
   } catch (err) {
@@ -191,9 +202,12 @@ export async function generateChurnPredictor(behavior: AudienceBehavior): Promis
 // --- CHAT DINÂMICO DOS AGENTES NO ESTÚDIO (VIA BACKEND PYTHON) ---
 export async function chatWithAgent(agentName: string, chatHistory: any[], userInput: string): Promise<string> {
   try {
-    const response = await fetch('http://127.0.0.1:8000/agent/chat', {
+    const response = await fetch('/api/agent/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(await getAuthHeader())
+      },
       body: JSON.stringify({
         agent_name: agentName,
         chat_history: chatHistory,

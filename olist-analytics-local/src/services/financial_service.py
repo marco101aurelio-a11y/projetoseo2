@@ -1,55 +1,58 @@
-from sqlalchemy.orm import Session
-from database.models import BusinessProfile, FinancialRecord
+from supabase import Client
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 
 class FinancialService:
     @staticmethod
-    def get_profile(db: Session) -> Optional[BusinessProfile]:
-        """Busca o único perfil de negócio (para MVP de usuário único)."""
-        return db.query(BusinessProfile).first()
+    def get_profile(db: Client) -> Optional[dict]:
+        """Busca o perfil de negócio (primeiro registro da business_configs)."""
+        res = db.table("business_configs").select("*").limit(1).execute()
+        return res.data[0] if res.data else None
 
     @staticmethod
-    def update_profile(db: Session, data: dict) -> BusinessProfile:
-        """Cria ou atualiza o perfil do negócio (Passos 1-3 do Wizard)."""
-        profile = db.query(BusinessProfile).first()
+    def update_profile(db: Client, data: dict) -> dict:
+        """Cria ou atualiza o perfil do negócio no Supabase."""
+        profile = FinancialService.get_profile(db)
+        
+        # Faz o map de campos síncronos se necessário (ex: meta_ad_account_id)
+        if "id" in data: del data["id"] # Não sobrescrever ID serial/uuid
+        
         if not profile:
-            profile = BusinessProfile(**data)
-            db.add(profile)
+            res = db.table("business_configs").insert(data).execute()
         else:
-            for key, value in data.items():
-                setattr(profile, key, value)
+            res = db.table("business_configs").update(data).eq("id", profile["id"]).execute()
         
-        db.commit()
-        db.refresh(profile)
-        return profile
+        return res.data[0] if res.data else {}
 
     @staticmethod
-    def add_financial_record(db: Session, data: dict) -> FinancialRecord:
-        """Adiciona um registro mensal de faturamento real (Verdade Financeira)."""
-        # Se já existir um registro para o mesmo mês, sobrescrevemos
-        existing = db.query(FinancialRecord).filter(
-            FinancialRecord.month_year == data.get("month_year")
-        ).first()
+    def add_financial_record(db: Client, data: dict) -> dict:
+        """Adiciona um registro na historical_metrics (Verdade Financeira)."""
+        # Verifica se já existe um registro para o mesmo mês
+        month_year = data.get("month_year")
         
-        if existing:
-            for key, value in data.items():
-                setattr(existing, key, value)
-            record = existing
+        # Tenta encontrar registro existente
+        existing = db.table("historical_metrics").select("id").eq("month_year", month_year).limit(1).execute()
+        
+        if existing.data:
+            record_id = existing.data[0]["id"]
+            res = db.table("historical_metrics").update(data).eq("id", record_id).execute()
         else:
-            record = FinancialRecord(**data)
-            db.add(record)
+            # Se não tiver metric_date, tentamos inferir
+            if "metric_date" not in data and month_year:
+                data["metric_date"] = f"{month_year}-01"
             
-        db.commit()
-        db.refresh(record)
-        return record
+            res = db.table("historical_metrics").insert(data).execute()
+            
+        return res.data[0] if res.data else {}
 
     @staticmethod
-    def get_latest_record(db: Session) -> Optional[FinancialRecord]:
-        """Retorna o registro financeiro mais recente para análise."""
-        return db.query(FinancialRecord).order_by(FinancialRecord.month_year.desc()).first()
+    def get_latest_record(db: Client) -> Optional[dict]:
+        """Retorna o registro financeiro mais recente."""
+        res = db.table("historical_metrics").select("*").order("month_year", desc=True).limit(1).execute()
+        return res.data[0] if res.data else None
 
     @staticmethod
-    def get_all_records(db: Session) -> List[FinancialRecord]:
-        """Retorna todo o histórico financeiro."""
-        return db.query(FinancialRecord).order_by(FinancialRecord.month_year.desc()).all()
+    def get_all_records(db: Client) -> List[dict]:
+        """Retorna todo o histórico financeiro do Supabase."""
+        res = db.table("historical_metrics").select("*").order("month_year", desc=True).execute()
+        return res.data or []

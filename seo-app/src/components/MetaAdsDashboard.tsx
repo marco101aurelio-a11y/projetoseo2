@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  TrendingUp, 
-  AlertCircle, 
-  RefreshCw, 
-  DollarSign, 
-  MousePointerClick, 
+import {
+  TrendingUp,
+  AlertCircle,
+  RefreshCw,
+  DollarSign,
+  MousePointerClick,
   ShoppingCart,
   Zap,
   Activity,
@@ -12,6 +12,7 @@ import {
   Target,
   Eye
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface MetaAdsDashboardProps {
   onOpenFinance: () => void;
@@ -51,10 +52,13 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
     setError(null);
     try {
       const isDemo = adAccountId === 'demo_account' || !accessToken;
-      
-      const res = await fetch('http://localhost:8000/finance/analyze/meta', {
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const authHeader = session ? { 'Authorization': `Bearer ${session.access_token}` } : {};
+
+      const res = await fetch('/api/finance/analyze/meta', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(authHeader as Record<string, string>) },
         body: JSON.stringify({
           ad_account_id: adAccountId || 'demo_account',
           access_token: accessToken || '',
@@ -77,23 +81,23 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
   }, [fetchDashboardData]);
 
   // --- HOOKS & DESTRUCTURING (Must be before any conditional returns) ---
-  const { 
-    resumo_meta = { roas_geral: 0, cac_geral: 0, investimento_total: 0, receita_total: 0, ctr_geral: 0, cpc_geral: 0, cpm_geral: 0 }, 
-    campanhas_meta = [], 
-    diagnostico = { health_score: 0, status_geral: 'DESCONHECIDO', alertas: [] } 
+  const {
+    resumo_meta = { roas_geral: 0, cac_geral: 0, investimento_total: 0, receita_total: 0, ctr_geral: 0, cpc_geral: 0, cpm_geral: 0 },
+    campanhas_meta = [],
+    diagnostico = { health_score: 0, status_geral: 'DESCONHECIDO', alertas: [] }
   } = data || {};
-  
+
   const isHealthy = diagnostico?.status_geral === 'SAUDAVEL';
   const isCritical = diagnostico?.status_geral === 'CRITICO';
 
   // Engine de Agrupamento Dinâmico (Híbrido)
   const getCampCategory = (camp: any) => {
     if (!camp || !camp.nome) return 'Outros';
-    
+
     // 1. Tenta pegar a Tag entre colchetes [Algo] (Pode estar em qualquer lugar do nome)
     const match = camp.nome.match(/\[(.*?)\]/);
     if (match) return match[1].trim();
-    
+
     // 2. Fallback para o Objetivo Real da API (Com tradução)
     const apiObjective = camp.objetivo_meta || 'OUTROS';
     return OBJECTIVE_MAP[apiObjective] || 'Outros';
@@ -102,19 +106,19 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
   const objectivesCount = useMemo(() => {
     if (!Array.isArray(campanhas_meta)) return [['Todas', 0]];
     const counts: Record<string, number> = { 'Todas': campanhas_meta.length };
-    
+
     campanhas_meta.forEach((camp: any) => {
       const category = getCampCategory(camp);
       counts[category] = (counts[category] || 0) + 1;
     });
-    
+
     return Object.entries(counts).sort((a, b) => a[0] === 'Todas' ? -1 : b[0] === 'Todas' ? 1 : (b[1] as number) - (a[1] as number));
   }, [campanhas_meta]);
 
   const filteredCampaigns = useMemo(() => {
     if (!Array.isArray(campanhas_meta)) return [];
     if (!selectedObjective || selectedObjective === 'Todas') return campanhas_meta;
-    
+
     return campanhas_meta.filter((camp: any) => getCampCategory(camp) === selectedObjective);
   }, [campanhas_meta, selectedObjective]);
   // -------------------------------------------------------------------
@@ -178,16 +182,15 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h2 className="font-display font-black text-2xl text-white">Meta Ads Engine</h2>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
-              isHealthy ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
-              isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
-              'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-            }`}>
+            <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${isHealthy ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                isCritical ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                  'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+              }`}>
               {diagnostico?.health_score || 0} Score • {diagnostico?.status_geral || 'N/A'}
             </span>
           </div>
           <p className="text-white/50 text-sm">
-            Conta: <strong>{data?.meta?.is_demo ? 'Modo Demonstração' : `Act_${data?.meta?.ad_account_id || adAccountId}`}</strong> 
+            Conta: <strong>{data?.meta?.is_demo ? 'Modo Demonstração' : `Act_${data?.meta?.ad_account_id || adAccountId}`}</strong>
             {!data?.meta?.is_demo && <span className="ml-2 px-1.5 py-0.5 bg-blue-500/10 text-blue-400 text-[10px] rounded border border-blue-500/20">Conectada Real</span>}
             • Histórico Completo
           </p>
@@ -204,7 +207,7 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 z-10">
-        
+
         {/* KPI Row (Negócios) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
@@ -249,28 +252,28 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
           <div className="mb-8 bg-red-500/10 border border-red-500/30 rounded-2xl p-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
             <div className="flex items-start gap-4">
-               <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
-                 <AlertCircle className="w-5 h-5 text-red-500" />
-               </div>
-               <div>
-                 <h4 className="font-bold text-red-400 text-lg mb-1">Gargalo Detectado: {diagnostico.alertas?.[0]?.camada}</h4>
-                 <p className="text-white/80 text-sm leading-relaxed mb-3">{diagnostico.alertas?.[0]?.mensagem}</p>
-                 <div className="flex gap-4 text-xs font-bold">
-                    <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Atual: <span className="text-red-400">{diagnostico.alertas?.[0]?.valor}</span></span>
-                    <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Benchmark GT: <span className="text-green-400">{diagnostico.alertas?.[0]?.benchmark}</span></span>
-                 </div>
-               </div>
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h4 className="font-bold text-red-400 text-lg mb-1">Gargalo Detectado: {diagnostico.alertas?.[0]?.camada}</h4>
+                <p className="text-white/80 text-sm leading-relaxed mb-3">{diagnostico.alertas?.[0]?.mensagem}</p>
+                <div className="flex gap-4 text-xs font-bold">
+                  <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Atual: <span className="text-red-400">{diagnostico.alertas?.[0]?.valor}</span></span>
+                  <span className="bg-black/30 px-3 py-1.5 rounded-md text-white/60">Benchmark GT: <span className="text-green-400">{diagnostico.alertas?.[0]?.benchmark}</span></span>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
           <div className="mb-8 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 flex items-center gap-4">
-             <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-               <Zap className="w-5 h-5 text-emerald-400" />
-             </div>
-             <div>
-               <h4 className="font-bold text-emerald-400 text-lg">Funil Otimizado</h4>
-               <p className="text-white/80 text-sm">As campanhas estão saudáveis e operando acima dos benchmarks do mercado.</p>
-             </div>
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+              <Zap className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <h4 className="font-bold text-emerald-400 text-lg">Funil Otimizado</h4>
+              <p className="text-white/80 text-sm">As campanhas estão saudáveis e operando acima dos benchmarks do mercado.</p>
+            </div>
           </div>
         )}
 
@@ -280,11 +283,10 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
             <button
               key={objective}
               onClick={() => setSelectedObjective(objective)}
-              className={`flex-shrink-0 px-5 py-2.5 rounded-[12px] text-sm font-bold transition-all border ${
-                (selectedObjective === objective) || (!selectedObjective && objective === 'Todas')
+              className={`flex-shrink-0 px-5 py-2.5 rounded-[12px] text-sm font-bold transition-all border ${(selectedObjective === objective) || (!selectedObjective && objective === 'Todas')
                   ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)] transform scale-105'
                   : 'bg-white/5 text-white/50 border-white/10 hover:bg-white/10 hover:text-white/80 hover:border-white/20'
-              }`}
+                }`}
             >
               {objective === 'Outros' ? 'Sem Tag' : objective} <span className="opacity-50 ml-1">({count})</span>
             </button>
@@ -335,7 +337,7 @@ export function MetaAdsDashboard({ onOpenFinance, adAccountId, accessToken }: Me
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-white/80">{camp.pedidos}</span>
                         <button className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/10 rounded-md transition-all ml-auto">
-                           <ArrowRight className="w-3 h-3 text-white/50" />
+                          <ArrowRight className="w-3 h-3 text-white/50" />
                         </button>
                       </div>
                     </td>

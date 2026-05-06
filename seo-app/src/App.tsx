@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { SearchBar } from './components/SearchBar';
 import { Dashboard } from './components/Dashboard';
@@ -8,16 +8,21 @@ import { RotatingText } from './components/RotatingText';
 import { fetchSeoData } from './services/dataForSeo';
 import { generateSeoInsights } from './services/gemini';
 import type { SeoResult, AiInsight } from './types';
-import { Bot } from 'lucide-react';
+import { Bot, LineChart } from 'lucide-react';
 import { Settings } from './components/Settings';
 import { Projects } from './components/Projects';
 import { InicioDashboard } from './components/InicioDashboard';
+import { projectService } from './services/projectService';
 import { MetaAuthCallback } from './components/MetaAuthCallback';
+import { supabase } from './lib/supabase';
+import { DiagnosticFlow, type DiagnosticData } from './components/DiagnosticFlow';
+import { DiagnosticDashboard, type DiagnosticResult } from './components/DiagnosticDashboard';
 
 import loginBg from './assets/galactic-bg.jpg';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('inicio');
   const [isSearching, setIsSearching] = useState(false);
   const [seoData, setSeoData] = useState<SeoResult | null>(null);
@@ -25,11 +30,141 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarPinned, setIsSidebarPinned] = useState(true);
 
-  const [projects, setProjects] = useState([
-    { id: 1, title: 'Análise de Concorrentes 2025', date: '10 de nov. de 2024', sources: 12 },
-    { id: 2, title: 'Estratégia SEO Black Friday', date: '22 de out. de 2024', sources: 8 },
-    { id: 3, title: 'Auditoria Técnica Blog', date: '5 de set. de 2024', sources: 4 },
-  ]);
+  // States for Initial Diagnostic Context
+  const [showDiagnosticFlow, setShowDiagnosticFlow] = useState(false);
+  const [diagnosticResult, setDiagnosticResult] = useState<DiagnosticResult | null>(null);
+  const [showDiagnosticDashboard, setShowDiagnosticDashboard] = useState(false);
+
+  // Monitora autenticação Supabase
+  useEffect(() => {
+    // 1. Verifica sessão inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+      if (session?.user) {
+        setUserId(session.user.id);
+      }
+    });
+
+    // 2. Escuta mudanças de estado (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Monitora primeiro acesso do usuário para abrir o pop-up
+  useEffect(() => {
+    if (isAuthenticated && userId) {
+      // Usamos localStorage por enquanto p/ armazenar status. 
+      // Em produção, isso seria um flag no "business_profiles".
+      const isCompleted = localStorage.getItem(`diagnostic_completed_${userId}`);
+      if (!isCompleted) {
+        setShowDiagnosticFlow(true);
+      }
+    }
+  }, [isAuthenticated, userId]);
+
+  const handleDiagnosticComplete = async (data: DiagnosticData) => {
+    // Aqui vai chamar a API JAX (ou mock) para pegar o Plano de Ação
+    try {
+      const response = await fetch('http://localhost:8000/analyze/diagnostic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify(data)
+      });
+      
+      let resultData: DiagnosticResult;
+      
+      if (response.ok) {
+        resultData = await response.json();
+      } else {
+        // Fallback premium em caso de erro na API/Offline (Arquitetura Capvi)
+        console.error("ALERTA DE ARQUITETURA: Servidor JAX/FastAPI indisponível. Ativando Motores de Contingência Local.");
+        resultData = {
+          marketing: {
+            score: 4.2, 
+            plan: [
+              "FALHA DE CONEXÃO: Operando em modo de segurança.",
+              "Formalizar um calendário editorial baseado nos objetivos.",
+              "Realocar orçamento para Meta Ads priorizando LTV da curva ABC."
+            ],
+            benchmarkData: [
+              { subject: 'CAC', A: 100, B: 120, fullMark: 150 }, 
+              { subject: 'LTV', A: 120, B: 90, fullMark: 150 }
+            ]
+          },
+          sales: {
+            score: 3.5, plan: ["Integrar WhatsApp e CRM nativamente.", "Configurar automação para lead scoring rápido."],
+            comparisonData: [{ name: 'Semana 1', equipe: 4000, automacao: 2400 }, { name: 'Semana 2', equipe: 3000, automacao: 4000 }]
+          },
+          tech: {
+            score: 4.0, plan: ["Mapear fluxo de dados e implementar Tag Manager.", "Ativar logs e tracking da API do Meta Ads."]
+          },
+          indicators: {
+            funnel: [{ name: 'Visitantes', value: 1000 }, { name: 'Leads', value: 200 }, { name: 'Vendas', value: 20 }]
+          }
+        };
+      }
+      
+      setDiagnosticResult(resultData);
+      
+      // Salva progresso do usuário
+      if (userId) {
+        localStorage.setItem(`diagnostic_completed_${userId}`, 'true');
+        // Opcional: salvar também no Supabase DB
+      }
+
+      setShowDiagnosticFlow(false);
+      
+      // Abre a aba com o dashboard de diagnóstico
+      setActiveTab('resultados-diagnostico');
+    } catch (err) {
+      console.error("Erro ao completar diagnóstico:", err);
+      setShowDiagnosticFlow(false);
+    }
+  };
+
+  const handleSkipDiagnostic = () => {
+    setShowDiagnosticFlow(false);
+    if (userId) {
+       // O usuário pulou, podemos marcar para não insistir toda vez que relogar hoje
+       localStorage.setItem(`diagnostic_completed_${userId}`, 'skipped');
+    }
+  };
+
+
+  const [projects, setProjects] = useState(() => {
+    const saved = projectService.getProjects();
+    return saved && saved.length > 0 ? saved as any[] : [];
+  });
+
+  // Limpeza temporária: Remove os projetos fakes (ids 1, 2 e 3) do cache local
+  useEffect(() => {
+    const saved = projectService.getProjects();
+    const fakeIds = ['1', '2', '3'];
+    const hasFakes = saved.some(p => fakeIds.includes(String(p.id)));
+    if (hasFakes) {
+      fakeIds.forEach(id => projectService.deleteProject(id));
+      setProjects(projectService.getProjects() as any[]);
+    }
+  }, []);
+
+  // Sync projects from localStorage when navigating tabs to guarantee freshness
+  useEffect(() => {
+    const saved = projectService.getProjects();
+    if (saved && saved.length > 0) {
+      setProjects(saved as any[]);
+    }
+  }, [activeTab]);
 
   // Detecta se estamos na rota de callback do Meta
   const isMetaCallback = window.location.pathname.startsWith('/auth/meta/callback');
@@ -37,7 +172,6 @@ export default function App() {
   if (isMetaCallback) {
     return <MetaAuthCallback />;
   }
-
 
   const handleSearch = async (query: string) => {
     setIsSearching(true);
@@ -75,6 +209,12 @@ export default function App() {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
       
+      {/* Fluxo Diagnóstico Inicial (Modal Overlay) */}
+      {showDiagnosticFlow && (
+        <DiagnosticFlow onComplete={handleDiagnosticComplete} onClose={handleSkipDiagnostic} />
+      )}
+
+      {/* Na Sidebar podemos adicionar o botão dos resultados de diagnóstico dinamicamente ou fixado, deixaremos mapeado lá se necessário */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isPinned={isSidebarPinned} setIsPinned={setIsSidebarPinned} />
 
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
@@ -82,7 +222,9 @@ export default function App() {
 
         <main className="flex-1 overflow-y-auto custom-scrollbar px-6 lg:px-12 py-8 scroll-smooth pb-24">
           <div className="w-full max-w-[1920px] mx-auto h-full text-white">
-            {activeTab === 'seo-resultados' ? (
+            {activeTab === 'resultados-diagnostico' ? (
+              <DiagnosticDashboard data={diagnosticResult} onFinish={() => setActiveTab('inicio')} />
+            ) : activeTab === 'seo-resultados' ? (
               <>
                 <div className="flex flex-col gap-10 mb-24">
                   <div className="max-w-4xl">
@@ -160,3 +302,4 @@ export default function App() {
     </div>
   );
 }
+

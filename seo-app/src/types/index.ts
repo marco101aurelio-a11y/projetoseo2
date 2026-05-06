@@ -79,11 +79,29 @@ export interface FinanceResult {
   benchmarks_applied?: any;
 }
 
-export interface Project {
+export interface Label {
   id: string;
-  name: string;
-  url: string;
-  description: string;
-  createdAt: string;
-  keywords: string[];
+  title: string;
+  color: string;
+}
+
+export type Project = {
+  id: string;
+  title?: string;
+  name?: string;
+  url?: string;
+  description?: string;
+  createdAt?: string;
+  date?: string;
+  sources?: number;
+  keywords?: string[];
+  labelIds?: string[];
+  cover?: {
+    type: 'color' | 'image';
+    value: string;
+    size: 'half' | 'full';
+  };
+  archived?: boolean;
+  startDate?: string;
+  endDate?: string;
 }

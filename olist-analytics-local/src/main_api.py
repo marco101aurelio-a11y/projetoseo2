@@ -19,11 +19,32 @@ from connectors.meta_to_finance_connector import MetaToFinanceConnector
 from engines.finance_engine import FinanceEngine, TrafficRawData
 from engines.funnel_models import list_funnel_types
 from routes.meta_auth import router as meta_auth_router
-from database.database import get_db, engine, Base
-from sqlalchemy.orm import Session
-from fastapi import Depends
+from database.database import get_db, get_supabase
+from fastapi import Depends, Header, HTTPException, status
+import os
+from supabase import Client
 
 load_dotenv()
+
+# Dependência de Segurança - Validação de JWT Supabase
+async def get_current_user(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de acesso ausente ou inválido",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    token = authorization.split(" ")[1]
+    sb: Client = get_supabase()
+    
+    try:
+        user_res = sb.auth.get_user(token)
+        if not user_res.user:
+            raise HTTPException(status_code=401, detail="Usuário não autenticado no Supabase")
+        return user_res.user
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Erro na validação do token: {str(e)}")
 
 app = FastAPI(title="Capvi Intelligence API - JAX Bridge")
 
@@ -75,6 +96,16 @@ class DreRequest(BaseModel):
     roas: float
     fixed_costs: float
     cogs_pct: float = 0.3
+
+class DiagnosticRequest(BaseModel):
+    sector: str
+    moment: str
+    objective: str
+    offer: str
+    margin: str
+    history: str
+    channels: List[str]
+    strategies: str
 
 # ── Novos modelos para Persistência e Onboarding v2.0
 class BusinessProfileRequest(BaseModel):
@@ -189,12 +220,63 @@ async def analyze_dre(request: DreRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/analyze/diagnostic")
+async def analyze_diagnostic(req: DiagnosticRequest):
+    # Endpoint preparado para o fluxo imersivo. 
+    # mock premium para o MVP:
+    return {
+      "marketing": {
+        "score": 4.5, 
+        "plan": [
+            f"Focar os canais relatados: {', '.join(req.channels) if req.channels else 'nenhum específico'} em topo de funil.", 
+            f"Otimizar a oferta: '{req.offer[:30]}...' para LTV.", 
+            "Testar 3 novas iscas digitais em Meta Ads."
+        ],
+        "benchmarkData": [
+            {"subject": 'CAC', "A": 90, "B": 120, "fullMark": 150}, 
+            {"subject": 'LTV', "A": 130, "B": 90, "fullMark": 150},
+            {"subject": 'Conversão', "A": 110, "B": 95, "fullMark": 150},
+            {"subject": 'Tráfego', "A": 85, "B": 100, "fullMark": 150},
+            {"subject": 'Engajamento', "A": 92, "B": 80, "fullMark": 150}
+        ]
+      },
+      "sales": {
+        "score": 3.8, 
+        "plan": [
+            "Implementar CRM focado no setor " + req.sector, 
+            "Configurar automação para lead scoring rápido baseado em " + req.moment
+        ],
+        "comparisonData": [
+            {"name": 'Semana 1', "equipe": 4000, "automacao": 2400}, 
+            {"name": 'Semana 2', "equipe": 3500, "automacao": 3800},
+            {"name": 'Semana 3', "equipe": 4200, "automacao": 5900},
+            {"name": 'Semana 4', "equipe": 3900, "automacao": 7200}
+        ]
+      },
+      "tech": {
+        "score": 3.0, 
+        "plan": [
+            "Mapear fluxo de dados e implementar Tag Manager.", 
+            "Ativar logs e tracking da API para " + (req.channels[0] if req.channels else "canais novos")
+        ]
+      },
+      "indicators": {
+        "funnel": [
+            {"name": 'Visitantes', "value": 15000}, 
+            {"name": 'Leads', "value": 3500}, 
+            {"name": 'Oportunidades', "value": 850},
+            {"name": 'Vendas', "value": 150}
+        ]
+      }
+    }
+
 @app.get("/analyze/benchmarks")
 def get_benchmarks():
     try:
         return math_engine.get_benchmarks()
     except Exception as e:
-        print(f"⚠️ Erro ao buscar benchmarks: {e}")
+        print(f"[WARN] Erro ao buscar benchmarks: {e}")
+
         # Fallback premium se os CSVs não existirem
         return {
             "total_customers": 158420,
@@ -223,7 +305,7 @@ async def process_agent_chat(req: AgentChatRequest):
 # ═══════════════════════════════════════════════════════
 
 @app.get("/meta/campaigns/{ad_account_id}")
-async def get_meta_campaigns(ad_account_id: str, period: str = "last_30d"):
+async def get_meta_campaigns(ad_account_id: str, period: str = "last_30d", user = Depends(get_current_user)):
     """
     Busca métricas de campanhas do Meta Ads.
     Se META_ACCESS_TOKEN não estiver configurado, retorna mock.
@@ -242,7 +324,7 @@ async def get_meta_campaigns(ad_account_id: str, period: str = "last_30d"):
 
 
 @app.get("/api/meta/accounts")
-async def get_meta_accounts(access_token: str):
+async def get_meta_accounts(access_token: str, user = Depends(get_current_user)):
     """Lista as contas de anúncios do usuário usando um token real."""
     token_to_use = access_token
     if access_token == "env_master_token":
@@ -255,7 +337,11 @@ async def get_meta_accounts(access_token: str):
     return result
 
 @app.post("/finance/analyze/meta")
-async def analyze_meta_to_dre(req: MetaAnalyzeRequest, db: Session = Depends(get_db)):
+async def analyze_meta_to_dre(
+    req: MetaAnalyzeRequest, 
+    db = Depends(get_db),
+    user = Depends(get_current_user)
+):
     """
     Pipeline: Meta Ads -> Normalização -> FinanceEngine.
     Lógica de Prioridade:
@@ -269,12 +355,12 @@ async def analyze_meta_to_dre(req: MetaAnalyzeRequest, db: Session = Depends(get
         db_record = FinancialService.get_latest_record(db)
         
         # Merge de configurações (Banco > Request > Defaults)
-        cogs_pct = db_profile.cogs_pct if db_profile else (req.cogs_pct or 0.3)
-        fixed_costs = db_profile.fixed_costs if db_profile else (req.fixed_costs or 3000.0)
-        funnel_type = db_profile.funnel_type if db_profile else (req.funnel_type or "b2c_ecommerce")
-        tax_rate = db_profile.tax_rate if db_profile else req.tax_rate
-        shipping_rate = db_profile.shipping_rate if db_profile else req.shipping_rate
-        marketplace_fee = db_profile.marketplace_fee if db_profile else req.marketplace_fee
+        cogs_pct = db_profile.get("cogs_pct") if db_profile else (req.cogs_pct or 0.3)
+        fixed_costs = db_profile.get("fixed_costs") if db_profile else (req.fixed_costs or 3000.0)
+        funnel_type = db_profile.get("funnel_type") if db_profile else (req.funnel_type or "b2c_ecommerce")
+        tax_rate = db_profile.get("tax_rate") if db_profile else req.tax_rate
+        shipping_rate = db_profile.get("shipping_rate") if db_profile else req.shipping_rate
+        marketplace_fee = db_profile.get("marketplace_fee") if db_profile else req.marketplace_fee
 
         # 1. Busca dados do Meta
         env_token = os.getenv("META_ACCESS_TOKEN")
@@ -317,11 +403,11 @@ async def analyze_meta_to_dre(req: MetaAnalyzeRequest, db: Session = Depends(get
         )
         
         # 3. Blended Revenue: Se houver dado real no banco, ele sobrescreve a estimativa da Meta
-        if db_record and db_record.real_revenue > 0:
-            traffic_data.revenue = db_record.real_revenue
-            traffic_data.orders = db_record.real_orders or traffic_data.orders
-            traffic_data.leads = db_record.real_leads or traffic_data.leads
-            traffic_data.sessions = db_record.total_sessions or traffic_data.sessions
+        if db_record and db_record.get("real_revenue", 0) > 0:
+            traffic_data.revenue = db_record["real_revenue"]
+            traffic_data.orders = db_record.get("real_orders") or traffic_data.orders
+            traffic_data.leads = db_record.get("real_leads") or traffic_data.leads
+            traffic_data.sessions = db_record.get("total_sessions") or traffic_data.sessions
 
         # 4. Roda FinanceEngine JAX
         engine = FinanceEngine(funnel_type=traffic_data.funnel_type)
@@ -349,7 +435,7 @@ async def analyze_meta_to_dre(req: MetaAnalyzeRequest, db: Session = Depends(get
 
 
 @app.post("/finance/analyze/raw")
-async def analyze_raw_traffic(req: RawTrafficRequest):
+async def analyze_raw_traffic(req: RawTrafficRequest, user = Depends(get_current_user)):
     """
     Análise via dados manuais — sem API externa.
     Usuário informa as métricas diretamente no Estúdio.
@@ -375,7 +461,7 @@ async def analyze_raw_traffic(req: RawTrafficRequest):
 
 
 @app.get("/finance/funnel-types")
-def get_funnel_types():
+def get_funnel_types(user = Depends(get_current_user)):
     """Lista os modelos de funil disponíveis para o onboarding do usuário."""
     return {"success": True, "data": list_funnel_types(), "error": None, "meta": {}}
 
@@ -384,7 +470,7 @@ def get_funnel_types():
 # ═══════════════════════════════════════════════════════
 
 @app.post("/api/v1/finance/profile")
-async def save_profile(req: BusinessProfileRequest, db: Session = Depends(get_db)):
+async def save_profile(req: BusinessProfileRequest, db = Depends(get_db), user = Depends(get_current_user)):
     """Salva ou atualiza o perfil do negócio (Wizard Passos 1-3)."""
     try:
         profile = FinancialService.update_profile(db, req.dict())
@@ -393,13 +479,13 @@ async def save_profile(req: BusinessProfileRequest, db: Session = Depends(get_db
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/finance/profile")
-async def get_profile(db: Session = Depends(get_db)):
+async def get_profile(db = Depends(get_db), user = Depends(get_current_user)):
     """Busca as configurações salvas do negócio."""
     profile = FinancialService.get_profile(db)
     return {"success": True, "data": profile}
 
 @app.post("/api/v1/finance/records")
-async def add_record(req: FinancialRecordRequest, db: Session = Depends(get_db)):
+async def add_record(req: FinancialRecordRequest, db = Depends(get_db), user = Depends(get_current_user)):
     """Adiciona um registro faturamento real (Pode ser chamado via IA Chat)."""
     try:
         record = FinancialService.add_financial_record(db, req.dict())
@@ -408,7 +494,7 @@ async def add_record(req: FinancialRecordRequest, db: Session = Depends(get_db))
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/finance/records")
-async def get_records(db: Session = Depends(get_db)):
+async def get_records(db = Depends(get_db), user = Depends(get_current_user)):
     """Lista o histórico faturamento real."""
     records = FinancialService.get_all_records(db)
     return {"success": True, "data": records}
