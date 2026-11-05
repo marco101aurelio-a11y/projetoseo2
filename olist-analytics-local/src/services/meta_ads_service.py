@@ -71,16 +71,9 @@ class MetaAdsService:
 
         if token:
             try:
-                # Se não temos app_secret real, passamos apenas o token
-                # Evita enviar appsecret_proof falso (dummy_secret) que o Facebook rejeita.
-                if app_id and app_secret:
-                    FacebookAdsApi.init(
-                        app_id=app_id,
-                        app_secret=app_secret,
-                        access_token=token
-                    )
-                else:
-                    FacebookAdsApi.init(access_token=token)
+                # Inicializa com o access_token diretamente
+                # Evita falha de appsecret_proof caso o token venha do Graph API Explorer
+                FacebookAdsApi.init(access_token=token)
                 self._initialized = True
             except Exception:
                 self._initialized = False
@@ -146,6 +139,7 @@ class MetaAdsService:
         ad_account_id: str,
         date_preset: str = "last_30d",
         include_inactive: bool = False,
+        daily_breakdown: bool = False,
         access_token: Optional[str] = None
     ) -> dict:
         """
@@ -163,8 +157,9 @@ class MetaAdsService:
             params = {
                 "date_preset": date_preset,
                 "level":       "campaign",
-                "time_increment": 1,  # breakdown diário
             }
+            if daily_breakdown:
+                params["time_increment"] = 1
 
             # Busca insights
             insights = account.get_insights(

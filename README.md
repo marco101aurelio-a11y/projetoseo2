@@ -1,86 +1,72 @@
-# Capvi IA: Marketing & Financial Intelligence 🧠💎
+# 🧠💎 Capvi IA — Acelerador de Lucratividade & Inteligência Martech
 
-Este projeto é uma plataforma de inteligência regenerativa que une **Kotler**, **V4 Company (AERM)** e **Growth Hacking**. O sistema utiliza um motor matemático em **JAX** (Python) e um cérebro de IA baseado no **Gemini 2.5/Flash-Latest**.
+O **Capvi IA (`projetoseo2`)** é uma plataforma de **Marketing & Financial Intelligence** que une a fundamentação estratégica de **Philip Kotler**, o método **AERM (V4 Company)** e **Growth Hacking** a um motor matemático vetorial em **Google JAX (`@jit`)** e agentes de IA (**Google Gemini** + **MCP Protocol**).
 
-## 🚀 Guia de Configuração (Novo Computador)
+---
 
-Siga estes passos para deixar o app funcional em qualquer máquina:
+## 🏗️ Arquitetura do Sistema
 
-### 1. Clonar o Repositório
-No terminal do novo computador:
-```bash
-git clone <url-do-seu-repositorio>
-cd "projeto Seo"
+```mermaid
+graph LR
+    Meta["Meta Marketing API (Graph v25)"] --> Connector["MetaToFinanceConnector"]
+    Google["Google Ads / DataForSEO"] --> SEOEngine["SEOEngine (JAX @jit)"]
+    Connector --> FinanceEngine["FinanceEngine DRE Pro (JAX @jit)"]
+    FinanceEngine --> API["FastAPI Bridge (Porta 8000)"]
+    SEOEngine --> API
+    API --> Frontend["Dashboard React + Vite + Tailwind (Porta 5173)"]
+    API --> MCP["Antigravity Central Hub (MCP Server)"]
 ```
 
-### 2. Configurar o Frontend (React)
-Navegue até a pasta do app e instale as dependências:
+### Principais Motores (`olist-analytics-local/src/`)
+- **`FinanceEngine` (DRE Pro Vetorial em JAX):** Simulação em tempo real de Receita Bruta, COGS, Impostos, Frete, Taxa de Marketplace, Margem de Contribuição, **EBITDA Final** e **Ponto de Equilíbrio (Breakeven)** com engenharia reversa de metas.
+- **`MetaAdsService` & `MetaToFinanceConnector`:** Integração direta com a **Meta Marketing API** (Facebook/Instagram Ads) convertendo campanhas reais em diagnóstico de lucratividade e recomendações de escala/pausa de criativos.
+- **`SEOEngine` & IPM (Índice de Potencial de Mercado):** Classificação vetorial de palavras-chave em **Oceano Azul** (`IPM > 10.000`), **Zona de Crescimento** e **Mercado Maduro**.
+- **`GrowthEngine` (Matriz ICE):** Priorização ágil de experimentos de Growth (*Impacto × Confiança × Facilidade*).
+- **`RetentionEngine` (CRM & RFM):** Segmentação estatística via Z-score (*Campeões, Leais, Em Risco, Perdidos*) calibrada com base real de e-commerce (**112k pedidos / Ticket Médio R$ 120,65**).
+
+---
+
+## 🚀 Como Executar
+
+### 1. Backend (FastAPI + Motor JAX)
+```bash
+cd olist-analytics-local
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python src/main_api.py
+```
+> O servidor FastAPI iniciará em `http://127.0.0.1:8000` (ou execute `run_backend.bat` na raiz).
+
+### 2. Frontend (React 18 + Vite + Tailwind CSS)
 ```bash
 cd seo-app
 npm install
-```
-
-**⚠️ Importante: Chaves de API**
-Como o arquivo `.env` está no `.gitignore` por segurança, você deve criá-lo manualmente na pasta `seo-app/`:
-1. Crie um arquivo chamado `.env`.
-2. Adicione suas chaves:
-```env
-VITE_GEMINI_API_KEY=Sua_Chave_Gemini_Aqui
-VITE_DATAFORSEO_LOGIN=seu_login
-VITE_DATAFORSEO_PASSWORD=sua_senha
-```
-
-### 3. Configurar o Motor Matemático (JAX Backend)
-O "coração" dos cálculos roda em Python 3.10+. Para ligar manualmente em uma nova máquina:
-
-1. **Vá para a pasta do motor:**
-   ```bash
-   cd olist-analytics-local
-   ```
-
-2. **Crie um ambiente virtual (Recomendado):**
-   ```bash
-   python3 -m venv .venv
-   ```
-
-3. **Ative o ambiente:**
-   - No Mac/Linux: `source .venv/bin/activate`
-   - No Windows: `.venv\Scripts\activate`
-
-4. **Instale as dependências:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-   *Se o `pip` não for encontrado, tente `python3 -m pip install -r requirements.txt`.*
-
-5. **Inicie o servidor de API:**
-   ```bash
-   python3 src/main_api.py
-   ```
-   *O backend estará rodando em `http://0.0.0.0:8000`. Ele já está configurado para aceitar conexões de outros dispositivos na mesma rede.*
-
----
-
-### 🌐 Acesso em Outros Dispositivos (Rede Local)
-Para abrir o app em outro celular/PC na mesma rede:
-1. **Frontend:** Rode `npm run dev -- --host` na pasta `seo-app`.
-2. **API:** No arquivo `seo-app/src/services/gemini.ts`, troque `127.0.0.1` pelo **IP Local** da sua máquina principal.
-3. **Acesse:** Use o IP mostrado no terminal (ex: `http://192.168.1.15:5173`).
-
-### 4. Rodar o Aplicativo
-Com o backend Python rodando na porta **8000**, inicie o frontend:
-```bash
-# Na pasta seo-app
 npm run dev
 ```
-Abra o link exibido no terminal (ex: http://localhost:5173).
+> Acesse a interface em `http://localhost:5173`.
 
 ---
-## 🛠️ Tecnologias Utilizadas
-- **Frontend**: Vite + React + Tailwind + Lucide Icons.
-- **AI Core**: Google Gemini AI (@google/genai).
-- **Engine Matemática**: Google JAX (High-performance numerical computing).
-- **Metodologia**: V4 AERM, Kotler e Growth Hacking.
 
-## 📦 O que subir para o Git?
-Apenas os arquivos de código e configuração. O "lixo" (datasets pesados, vídeos e node_modules) já está sendo ignorado pelo nosso `.gitignore` atualizado na V3.6.
+## 🔐 Variáveis de Ambiente (`.env`)
+Crie seu arquivo `.env` em `olist-analytics-local/.env` e `seo-app/.env` (nunca versionados no Git):
+
+```env
+# Meta Marketing API
+META_APP_ID=SEU_APP_ID
+META_APP_SECRET=SEU_APP_SECRET
+META_ACCESS_TOKEN=SEU_ACCESS_TOKEN
+META_AD_ACCOUNT_ID=000000000000000
+
+# Google Gemini & DataForSEO (Frontend)
+VITE_GEMINI_API_KEY=SUA_CHAVE_GEMINI
+VITE_DATAFORSEO_LOGIN=SEU_LOGIN
+VITE_DATAFORSEO_PASSWORD=SUA_SENHA
+```
+
+---
+
+## 🛠️ Stack Tecnológica
+- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons
+- **Backend & Math Engine:** Python 3.10+, FastAPI, Uvicorn, Google JAX (`jax`, `jaxlib`), Pandas, SQLAlchemy, Supabase
+- **Integrações Martech:** Meta Business SDK (`facebook-business`), Google Ads API, DataForSEO, Model Context Protocol (MCP)
